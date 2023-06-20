@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Version>1.0.1</Version>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Authors>blazkaro</Authors>
+		<Description>Defines core models and storage abstraction layer for FAPI Server</Description>
+		<PackageProjectUrl>https://github.com/blazkaro/FAPIServer</PackageProjectUrl>
+		<Copyright>Copyright (c) Karol Błażejczyk 2023</Copyright>
+		<RepositoryUrl>https://github.com/blazkaro/FAPIServer</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>FAPI OAuth OpenID Connect Security</PackageTags>
+		<Title>FAPIServer.Storage</Title>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Base64-Url" Version="1.0.0" />
+		<PackageReference Include="JsonSchema.Net" Version="4.1.5" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>1.0.0</Version>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<Authors>blazkaro</Authors>
+		<Description>Web layer for FAPI Server using ASP NET. Provides needed controllers and authorization</Description>
+		<PackageProjectUrl>https://github.com/blazkaro/FAPIServer</PackageProjectUrl>
+		<Copyright>Copyright (c) Karol Błażejczyk 2023</Copyright>
+		<RepositoryUrl>https://github.com/blazkaro/FAPIServer</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>FAPI OAuth OpenID Connect Security</PackageTags>
+		<Title>FAPIServer.Web</Title>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FAPIServer" Version="1.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+</Project>
