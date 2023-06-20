@@ -111,6 +111,7 @@ While the `openid` is special, built-in type, it doesn't need to have specified 
 - [ ] Support for CIBA
 - [ ] Support for application-level request signing between client and authorization server by using `client_assertion` and `DPoP` mechanism.
 - [ ] Support for encrypting userinfo and token introspection responses by using ECDH with Ephermal Keys.
+- [ ] Support for DPoP revocation after use (the same mechanism as with `client_assertion`)
 - [ ] Add optional, configurable application-level authorization server`s response body security by using signatures.
 - [ ] Add better documentation for project
 - [ ] Add unit tests
@@ -134,10 +135,12 @@ You need to create your custom `IUserClaimsService` to use at userinfo endpoint.
 
 <i>Remember to call app.MapControllers()</i>
 
-### Short explanation
+### Short explanation of important implementation specific aspects
 You can use in memory credentials store, as shown below, but then singleton with ed25519 key-pair will be registered. Consider your own implementation in production.
 
 The default authorization request persistence service will use `IParObjectStore` to manage authorization sessions. It will create `sid`, store it in cookie and associate with appropriate `ParObject`. If you want different behavior, you also can use your own implementation.
+
+If you don't specify `dpop_pkh` parameter in PAR request, or you use machine-to-machine grant and don't use `DPoP` header at token endpoint, the access token will be bounded to the client`s authentication public key.
 
 ### Security policy
 If you see security issues, please contact me by email, blazkaro.programmer@protonmail.com
