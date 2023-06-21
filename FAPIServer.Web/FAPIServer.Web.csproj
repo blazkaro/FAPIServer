@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>1.0.4</Version>
+		<Version>1.0.5</Version>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Authors>blazkaro</Authors>
 		<Description>Web layer for FAPI Server using ASP NET. Provides needed controllers and authorization</Description>
@@ -32,14 +32,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="FAPIServer" Version="1.0.3" />
+		<PackageReference Include="FAPIServer" Version="1.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 </Project>
