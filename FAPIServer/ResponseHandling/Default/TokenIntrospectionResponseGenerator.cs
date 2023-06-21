@@ -56,7 +56,7 @@ public class TokenIntrospectionResponseGenerator : ITokenIntrospectionResponseGe
             Sub = atPayload.Subject,
             Cnf = atPayload.Cnf,
             AuthorizationDetails = authorizationDetails,
-            TokenIdentifier = atPayload.Jti.ToString()
+            Jti = atPayload.Jti.ToString()
         };
     }
 

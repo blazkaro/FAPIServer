@@ -1,6 +1,5 @@
 ﻿using FAPIServer.Authentication;
 using FAPIServer.Extensions;
-using FAPIServer.Models;
 using FAPIServer.RequestHandling.Contexts;
 using FAPIServer.RequestHandling.Results;
 using FAPIServer.ResponseHandling;
@@ -56,7 +55,7 @@ public class TokenIntrospectionHandler : ITokenIntrospectionHandler
         if (!validationResult.IsValid)
             return new(new TokenIntrospectionResponse { Active = false });
 
-        return new(await _responseGenerator.GenerateAsync(new AccessTokenPayload(validationResult.Payload), client, cancellationToken));
+        return new(await _responseGenerator.GenerateAsync(validationResult.Payload, client, cancellationToken));
     }
 
     private async Task<TokenIntrospectionHandlerResult> IntrospectRefreshToken(TokenIntrospectionContext context, Client client, CancellationToken cancellationToken)

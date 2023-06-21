@@ -1,8 +1,9 @@
-﻿using FAPIServer.Validation.Results;
+﻿using FAPIServer.Models;
+using FAPIServer.Validation.Results;
 
 namespace FAPIServer.Validation;
 
 public interface IAccessTokenValidator
 {
-    Task<TokenValidationResult> ValidateAsync(string validIssuer, string accessToken, CancellationToken cancellationToken = default);
+    Task<TokenValidationResult<AccessTokenPayload>> ValidateAsync(string validIssuer, string accessToken, CancellationToken cancellationToken = default);
 }

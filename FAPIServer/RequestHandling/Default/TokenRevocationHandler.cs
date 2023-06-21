@@ -1,6 +1,5 @@
 ﻿using FAPIServer.Authentication;
 using FAPIServer.Extensions;
-using FAPIServer.Models;
 using FAPIServer.RequestHandling.Contexts;
 using FAPIServer.RequestHandling.Results;
 using FAPIServer.Storage.Models;
@@ -55,7 +54,7 @@ public class TokenRevocationHandler : ITokenRevocationHandler
         var validationResult = await _accessTokenValidator.ValidateAsync(context.ValidTokenIssuer, context.Request.Token, cancellationToken);
         if (!validationResult.IsValid) return;
 
-        var atPayload = new AccessTokenPayload(validationResult.Payload);
+        var atPayload = validationResult.Payload;
         if (atPayload.ClientId != client.ClientId) return;
 
         await _revokedAccessTokenStore.StoreAsync(

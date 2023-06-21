@@ -1,8 +1,9 @@
 ﻿namespace FAPIServer.Validation.Results;
 
-public class TokenValidationResult
+public class TokenValidationResult<TPayload>
+    where TPayload : class
 {
-    public TokenValidationResult(IDictionary<string, object> payload)
+    public TokenValidationResult(TPayload payload)
     {
         IsValid = true;
         Payload = payload ?? throw new ArgumentNullException(nameof(payload));
@@ -15,9 +16,9 @@ public class TokenValidationResult
     }
 
     public bool IsValid { get; init; }
-    public IDictionary<string, object> Payload { get; init; }
+    public TPayload Payload { get; init; }
     public string? FailureMessage { get; init; }
 
-    public static TokenValidationResult MissingClaim(string claimName) => new($"The '{claimName}' claim is missing");
-    public static TokenValidationResult InvalidClaim(string claimName) => new($"The '{claimName}' claim is invalid");
+    public static TokenValidationResult<TPayload> MissingClaim(string claimName) => new($"The '{claimName}' claim is missing");
+    public static TokenValidationResult<TPayload> InvalidClaim(string claimName) => new($"The '{claimName}' claim is invalid");
 }

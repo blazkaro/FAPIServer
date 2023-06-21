@@ -11,21 +11,9 @@ public class AccessTokenPayload
 
     }
 
-    public AccessTokenPayload(IDictionary<string, object> payload)
+    public static AccessTokenPayload? FromJson(string json)
     {
-        var atPayload = JsonSerializer.Deserialize<AccessTokenPayload>(JsonSerializer.Serialize(payload));
-        if (atPayload is null)
-            throw new JsonException("The payload could not be properly deserialized");
-
-        Issuer = atPayload.Issuer;
-        Subject = atPayload.Subject;
-        NotBefore = atPayload.NotBefore;
-        Expiration = atPayload.Expiration;
-        Jti = atPayload.Jti;
-        ClientId = atPayload.ClientId;
-        Cnf = atPayload.Cnf;
-        AuthorizationDetails = atPayload.AuthorizationDetails;
-        Claims = atPayload.Claims;
+        return JsonSerializer.Deserialize<AccessTokenPayload>(json);
     }
 
     [JsonPropertyName("iss")]

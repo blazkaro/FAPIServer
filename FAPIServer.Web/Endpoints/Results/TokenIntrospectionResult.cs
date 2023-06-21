@@ -28,7 +28,7 @@ public class TokenIntrospectionResult : IActionResult
             Sub = _response.Sub,
             Cnf = _response.Cnf,
             AuthorizationDetails = _response.AuthorizationDetails,
-            TokenIdentifier = _response.TokenIdentifier
+            Jti = _response.Jti
         };
 
         context.HttpContext.Response.StatusCode = StatusCodes.Status200OK;
@@ -41,27 +41,35 @@ public class TokenIntrospectionResult : IActionResult
         public bool Active { get; set; }
 
         [JsonPropertyName("client_id")]
-        public string ClientId { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? ClientId { get; set; }
 
         [JsonPropertyName("token_type")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? TokenType { get; set; }
 
-        [JsonPropertyName("not_before")]
+        [JsonPropertyName("nbf")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public DateTime? NotBefore { get; set; }
 
-        [JsonPropertyName("expiration")]
-        public DateTime Expiration { get; set; }
+        [JsonPropertyName("exp")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DateTime? Expiration { get; set; }
 
         [JsonPropertyName("sub")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Sub { get; set; }
 
         [JsonPropertyName("cnf")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public CnfClaim? Cnf { get; set; }
 
         [JsonPropertyName("authorization_details")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public IEnumerable<AuthorizationDetail>? AuthorizationDetails { get; set; }
 
-        [JsonPropertyName("token_identifier")]
-        public string? TokenIdentifier { get; set; }
+        [JsonPropertyName("jti")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Jti { get; set; }
     }
 }

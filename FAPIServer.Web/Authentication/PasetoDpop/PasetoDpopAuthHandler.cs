@@ -49,11 +49,10 @@ public class PasetoDpopAuthHandler : AuthenticationHandler<PasetoDpopAuthOptions
         if (!accessTokenValidationResult.IsValid)
             return Fail(accessTokenValidationResult.FailureMessage);
 
-        var pkh = (string)accessTokenValidationResult.Payload.SingleOrDefault(p => p.Key == "pkh").Value;
         var dpopProofValidationResult = _dpopProofValidator.Validate(dpop, new DPoPValidationParameters(
             Request.GetRequestedEndpointUri(),
             Request.Method,
-            Base64UrlEncoder.Decode(pkh),
+            Base64UrlEncoder.Decode(accessTokenValidationResult.Payload.Cnf.Pkh),
             HashAlgorithm.Sha256.Hash(Encoding.UTF8.GetBytes(accessToken))));
 
         if (!dpopProofValidationResult.IsValid)

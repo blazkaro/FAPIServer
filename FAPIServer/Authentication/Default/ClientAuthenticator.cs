@@ -1,11 +1,10 @@
-﻿using FAPIServer.Serializers;
+﻿using FAPIServer.Models;
+using FAPIServer.Serializers;
 using FAPIServer.Storage.Models;
 using FAPIServer.Storage.Stores;
 using Microsoft.Extensions.Options;
 using Paseto;
 using Paseto.Builder;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace FAPIServer.Authentication.Default;
 
@@ -62,22 +61,21 @@ public class ClientAuthenticator : IClientAuthenticator
         if (!assertionValidationResult.IsValid || !assertionValidationResult.Paseto.Payload.HasNotBefore() || !assertionValidationResult.Paseto.Payload.HasTokenIdentifier())
             return Failed(Error.InvalidClient, "Invalid client assertion");
 
+        var assertionPayload = ClientAssertionPayload.FromJson(assertionValidationResult.Paseto.RawPayload)!;
         if (_options.UseClientAssertionRevocation)
         {
-            var jti = (string)assertionValidationResult.Paseto.Payload[PasetoRegisteredClaimNames.TokenIdentifier];
-            var isRevoked = await _revokedClientAssertionStore.IsRevokedAsync(jti, client.ClientId, cancellationToken);
+            var isRevoked = await _revokedClientAssertionStore.IsRevokedAsync(assertionPayload.Jti.ToString(), client.ClientId, cancellationToken);
             if (isRevoked) return Failed(Error.InvalidClient, "The client assertion is revoked");
 
-            var exp = (DateTime)assertionValidationResult.Paseto.Payload[PasetoRegisteredClaimNames.ExpirationTime];
             await _revokedClientAssertionStore.StoreAsync(new RevokedClientAssertion
             {
-                Jti = jti,
+                Jti = assertionPayload.Jti.ToString(),
                 ClientId = client.ClientId,
-                AssertionExpiresAt = exp
+                AssertionExpiresAt = assertionPayload.Expiration
             }, cancellationToken);
         }
 
-        return new(client, assertionValidationResult.Paseto.Payload);
+        return new(client, assertionPayload);
     }
 
     private static ClientAuthenticationResult Failed(Error error, string? failureMessage = null)

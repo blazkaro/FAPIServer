@@ -20,7 +20,7 @@ public class AccessTokenValidator : IAccessTokenValidator
         _revokedAccessTokenStore = revokedAccessTokenStore;
     }
 
-    public async Task<TokenValidationResult> ValidateAsync(string validIssuer, string accessToken, CancellationToken cancellationToken = default)
+    public async Task<TokenValidationResult<AccessTokenPayload>> ValidateAsync(string validIssuer, string accessToken, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(validIssuer))
             throw new ArgumentException($"'{nameof(validIssuer)}' cannot be null or empty.", nameof(validIssuer));
@@ -45,15 +45,18 @@ public class AccessTokenValidator : IAccessTokenValidator
         if (!validationResult.IsValid)
             return new(validationResult.Exception.Message);
 
-        var atPayload = new AccessTokenPayload(validationResult.Paseto.Payload);
+        var atPayload = AccessTokenPayload.FromJson(validationResult.Paseto.RawPayload)!;
+        if (atPayload.NotBefore == default)
+            return TokenValidationResult<AccessTokenPayload>.MissingClaim(PasetoRegisteredClaimNames.NotBefore);
+
         if (atPayload.Jti == Guid.Empty)
-            return TokenValidationResult.MissingClaim(PasetoRegisteredClaimNames.TokenIdentifier);
+            return TokenValidationResult<AccessTokenPayload>.MissingClaim(PasetoRegisteredClaimNames.TokenIdentifier);
 
         if (atPayload.ClientId.IsNullOrEmpty())
-            return TokenValidationResult.MissingClaim("client_id");
+            return TokenValidationResult<AccessTokenPayload>.MissingClaim("client_id");
 
         if (atPayload.Cnf is null)
-            return TokenValidationResult.MissingClaim("cnf");
+            return TokenValidationResult<AccessTokenPayload>.MissingClaim("cnf");
 
         if (atPayload.Cnf.Pkh.IsNullOrEmpty())
             return new("The 'pkh' property must be present in 'cnf' object");
@@ -61,6 +64,6 @@ public class AccessTokenValidator : IAccessTokenValidator
         if (await _revokedAccessTokenStore.IsRevokedAsync(atPayload.Jti.ToString(), cancellationToken))
             return new("The access token is revoked");
 
-        return new(validationResult.Paseto.Payload);
+        return new(atPayload);
     }
 }

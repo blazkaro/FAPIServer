@@ -1,6 +1,7 @@
 ﻿using Base64Url;
 using FAPIServer.Extensions;
 using FAPIServer.Helpers;
+using FAPIServer.Models;
 using FAPIServer.Serializers;
 using FAPIServer.Validation.Contexts;
 using FAPIServer.Validation.Results;
@@ -14,7 +15,7 @@ namespace FAPIServer.Validation.Default;
 
 public class DPoPProofValidator : IDPoPProofValidator
 {
-    public TokenValidationResult Validate(string dpop, DPoPValidationParameters parameters)
+    public TokenValidationResult<DPoPPayload> Validate(string dpop, DPoPValidationParameters parameters)
     {
         if (string.IsNullOrEmpty(dpop))
             throw new ArgumentException($"'{nameof(dpop)}' cannot be null or empty.", nameof(dpop));
@@ -51,26 +52,28 @@ public class DPoPProofValidator : IDPoPProofValidator
         if (!validationResult.IsValid)
             return new(validationResult.Exception.Message);
 
-        var payload = validationResult.Paseto.Payload;
-        if (!payload.HasTokenIdentifier())
-            return TokenValidationResult.MissingClaim(PasetoRegisteredClaimNames.TokenIdentifier);
+        var payload = DPoPPayload.FromJson(validationResult.Paseto.RawPayload)!;
+        if (payload.NotBefore == default)
+            return TokenValidationResult<DPoPPayload>.MissingClaim(PasetoRegisteredClaimNames.NotBefore);
 
-        var htm = (string?)payload["htm"];
-        var htu = (string?)payload["htu"];
+        if (payload.Jti == Guid.Empty)
+            return TokenValidationResult<DPoPPayload>.MissingClaim(PasetoRegisteredClaimNames.TokenIdentifier);
 
-        if (htm.IsNullOrEmpty()) return TokenValidationResult.MissingClaim("htm");
-        if (htu.IsNullOrEmpty()) return TokenValidationResult.MissingClaim("htu");
+        if (payload.Htm.IsNullOrEmpty()) return TokenValidationResult<DPoPPayload>.MissingClaim("htm");
+        if (payload.Htu.IsNullOrEmpty()) return TokenValidationResult<DPoPPayload>.MissingClaim("htu");
 
-        if (htm.Equals(parameters.ValidHtm, StringComparison.OrdinalIgnoreCase)) return TokenValidationResult.InvalidClaim("htm");
-        if (!htu.Equals(parameters.ValidHtu.ToString(), StringComparison.OrdinalIgnoreCase)) return TokenValidationResult.InvalidClaim("htu");
+        if (payload.Htm.Equals(parameters.ValidHtm, StringComparison.OrdinalIgnoreCase))
+            return TokenValidationResult<DPoPPayload>.InvalidClaim("htm");
+
+        if (!payload.Htu.Equals(parameters.ValidHtu.ToString(), StringComparison.OrdinalIgnoreCase))
+            return TokenValidationResult<DPoPPayload>.InvalidClaim("htu");
 
         if (parameters.ValidAth is not null)
         {
-            var ath = (string?)payload["ath"];
-            if (ath.IsNullOrEmpty()) return TokenValidationResult.MissingClaim("ath");
+            if (payload.Ath.IsNullOrEmpty()) return TokenValidationResult<DPoPPayload>.MissingClaim("ath");
 
-            if (ath != Base64UrlEncoder.Encode(parameters.ValidAth))
-                return TokenValidationResult.InvalidClaim("ath");
+            if (payload.Ath != Base64UrlEncoder.Encode(parameters.ValidAth))
+                return TokenValidationResult<DPoPPayload>.InvalidClaim("ath");
         }
 
         return new(payload);
