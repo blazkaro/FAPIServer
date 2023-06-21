@@ -1,4 +1,5 @@
-﻿using FAPIServer.ResponseHandling.Models;
+﻿using FAPIServer.Models;
+using FAPIServer.ResponseHandling.Models;
 using FAPIServer.Storage.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -55,7 +56,7 @@ public class TokenIntrospectionResult : IActionResult
         public string? Sub { get; set; }
 
         [JsonPropertyName("cnf")]
-        public object? Cnf { get; set; }
+        public CnfClaim? Cnf { get; set; }
 
         [JsonPropertyName("authorization_details")]
         public IEnumerable<AuthorizationDetail>? AuthorizationDetails { get; set; }

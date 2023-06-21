@@ -1,6 +1,6 @@
 ﻿using FAPIServer.Services;
 using FAPIServer.Web.Authentication.PasetoDpop;
-using FAPIServer.Web.Services;
+using FAPIServer.Web.Services.Default;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;

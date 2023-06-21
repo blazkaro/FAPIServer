@@ -77,7 +77,7 @@ public class ClientAuthenticator : IClientAuthenticator
             }, cancellationToken);
         }
 
-        return new(client, assertionValidationResult.Paseto.Payload.Select(p => new Claim(p.Key, JsonSerializer.Serialize(p.Value))));
+        return new(client, assertionValidationResult.Paseto.Payload);
     }
 
     private static ClientAuthenticationResult Failed(Error error, string? failureMessage = null)

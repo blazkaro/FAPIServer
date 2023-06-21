@@ -1,4 +1,5 @@
-﻿using FAPIServer.Storage.ValueObjects;
+﻿using FAPIServer.Models;
+using FAPIServer.Storage.ValueObjects;
 
 namespace FAPIServer.ResponseHandling.Models;
 
@@ -10,7 +11,7 @@ public class TokenIntrospectionResponse
     public DateTime? NotBefore { get; set; }
     public DateTime Expiration { get; set; }
     public string? Sub { get; set; }
-    public object? Cnf { get; set; }
+    public CnfClaim? Cnf { get; set; }
     public IEnumerable<AuthorizationDetail>? AuthorizationDetails { get; set; }
     public string? TokenIdentifier { get; set; }
 }

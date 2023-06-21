@@ -7,7 +7,7 @@ using FAPIServer.Storage.Stores;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
 
-namespace FAPIServer.Web.Services;
+namespace FAPIServer.Web.Services.Default;
 
 /// <summary>
 /// Authorization request persistence service implementation that relies on <see cref="IParObjectStore"/> and session

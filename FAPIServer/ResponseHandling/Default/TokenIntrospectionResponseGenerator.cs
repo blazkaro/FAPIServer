@@ -1,8 +1,7 @@
-﻿using FAPIServer.Extensions;
+﻿using FAPIServer.Models;
 using FAPIServer.ResponseHandling.Models;
 using FAPIServer.Storage.Models;
 using FAPIServer.Storage.Stores;
-using System.Text.Json;
 
 namespace FAPIServer.ResponseHandling.Default;
 
@@ -15,7 +14,7 @@ public class TokenIntrospectionResponseGenerator : ITokenIntrospectionResponseGe
         _apiResourceStore = apiResourceStore;
     }
 
-    public async Task<TokenIntrospectionResponse> GenerateAsync(IEnumerable<KeyValuePair<string, object>> atPayload, Client client, CancellationToken cancellationToken = default)
+    public async Task<TokenIntrospectionResponse> GenerateAsync(AccessTokenPayload atPayload, Client client, CancellationToken cancellationToken = default)
     {
         if (atPayload is null)
             throw new ArgumentNullException(nameof(atPayload));
@@ -23,17 +22,19 @@ public class TokenIntrospectionResponseGenerator : ITokenIntrospectionResponseGe
         if (client is null)
             throw new ArgumentNullException(nameof(client));
 
-        var azp = (string)atPayload.SingleOrDefault(p => p.Key == "azp").Value;
-        var authorizationDetails = AuthorizationDetailExtensions.ReadFromJson((string?)atPayload.SingleOrDefault(p => p.Key == "authorization_details").Value,
-            out _);
+        var authorizationDetails = atPayload.AuthorizationDetails;
 
-        // When authorized party (access token owner) is not equal to client id that requested this introspection, then it can be resource server. Check it
-        if (azp != client.ClientId)
+        // When client id (access token owner) is not equal to client id that requested this introspection, then it can be resource server. Check it
+        if (atPayload.ClientId != client.ClientId)
         {
             var apiResource = await _apiResourceStore.FindByClientIdAsync(client.ClientId, cancellationToken);
 
             // When the client which requested introspection is not authorized party and is not resource server
             if (apiResource == null)
+                return new() { Active = false };
+
+            // If no authorization details then is not active for resource server
+            if (authorizationDetails is null || !authorizationDetails.Any())
                 return new() { Active = false };
 
             // Whether the resource server is token audience
@@ -45,21 +46,17 @@ public class TokenIntrospectionResponseGenerator : ITokenIntrospectionResponseGe
             authorizationDetails = authorizationDetails.Where(p => apiResource.HandledAuthorizationDetailTypes.Contains(p.Type));
         }
 
-        // If no authorization details then is not active
-        if (!authorizationDetails.Any())
-            return new() { Active = false };
-
         return new()
         {
             Active = true,
-            ClientId = azp,
+            ClientId = atPayload.ClientId,
             TokenType = Constants.SupportedAccessTokenTypes.DPoP,
-            NotBefore = (DateTime)atPayload.SingleOrDefault(p => p.Key == "nbf").Value,
-            Expiration = (DateTime)atPayload.SingleOrDefault(p => p.Key == "exp").Value,
-            Sub = (string)atPayload.SingleOrDefault(p => p.Key == "sub").Value,
-            Cnf = JsonSerializer.Deserialize<object>((string)atPayload.SingleOrDefault(p => p.Key == "cnf").Value),
+            NotBefore = atPayload.NotBefore,
+            Expiration = atPayload.Expiration,
+            Sub = atPayload.Subject,
+            Cnf = atPayload.Cnf,
             AuthorizationDetails = authorizationDetails,
-            TokenIdentifier = (string)atPayload.SingleOrDefault(p => p.Key == "jti").Value
+            TokenIdentifier = atPayload.Jti.ToString()
         };
     }
 

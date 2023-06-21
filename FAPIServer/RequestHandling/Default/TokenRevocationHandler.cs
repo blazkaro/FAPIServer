@@ -1,11 +1,11 @@
 ﻿using FAPIServer.Authentication;
 using FAPIServer.Extensions;
+using FAPIServer.Models;
 using FAPIServer.RequestHandling.Contexts;
 using FAPIServer.RequestHandling.Results;
 using FAPIServer.Storage.Models;
 using FAPIServer.Storage.Stores;
 using FAPIServer.Validation;
-using Paseto;
 
 namespace FAPIServer.RequestHandling.Default;
 
@@ -55,13 +55,15 @@ public class TokenRevocationHandler : ITokenRevocationHandler
         var validationResult = await _accessTokenValidator.ValidateAsync(context.ValidTokenIssuer, context.Request.Token, cancellationToken);
         if (!validationResult.IsValid) return;
 
-        var azp = (string)validationResult.Payload.SingleOrDefault(p => p.Key == "azp").Value;
-        if (azp != client.ClientId) return;
+        var atPayload = new AccessTokenPayload(validationResult.Payload);
+        if (atPayload.ClientId != client.ClientId) return;
 
-        var jti = (string)validationResult.Payload.SingleOrDefault(p => p.Key == PasetoRegisteredClaimNames.TokenIdentifier).Value;
-        var exp = (DateTime)validationResult.Payload.SingleOrDefault(p => p.Key == PasetoRegisteredClaimNames.ExpirationTime).Value;
-
-        await _revokedAccessTokenStore.StoreAsync(new RevokedAccessToken { Jti = jti, TokenExpiresAt = exp }, cancellationToken);
+        await _revokedAccessTokenStore.StoreAsync(
+            new RevokedAccessToken
+            {
+                Jti = atPayload.Jti.ToString(),
+                TokenExpiresAt = atPayload.Expiration
+            }, cancellationToken);
     }
 
     private async Task RevokeRefreshToken(TokenRevocationContext context, Client client, CancellationToken cancellationToken)

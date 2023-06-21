@@ -1,11 +1,10 @@
 ﻿using FAPIServer.Storage.Models;
-using System.Security.Claims;
 
 namespace FAPIServer.Authentication;
 
 public class ClientAuthenticationResult
 {
-    public ClientAuthenticationResult(Client client, IEnumerable<Claim> assertionPayload)
+    public ClientAuthenticationResult(Client client, IDictionary<string, object> assertionPayload)
     {
         IsAuthenticated = true;
         Client = client ?? throw new ArgumentNullException(nameof(client));
@@ -26,7 +25,7 @@ public class ClientAuthenticationResult
 
     public bool IsAuthenticated { get; init; }
     public Client Client { get; init; }
-    public IEnumerable<Claim> AssertionPayload { get; init; }
+    public IDictionary<string, object> AssertionPayload { get; init; }
     public Error? Error { get; init; }
     public string? FailureMessage { get; init; }
 }
