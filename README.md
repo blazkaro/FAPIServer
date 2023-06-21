@@ -135,7 +135,7 @@ You need to create your custom `IUserClaimsService` to use at userinfo endpoint.
 
 <i>Remember to call app.MapControllers()</i>
 
-Discovery endpoint: <b>https://localhost:7119/.well-known/fapi-configuration</b>
+Discovery path: <b>/.well-known/fapi-configuration</b>
 
 ### Short explanation of important implementation specific aspects
 You can use in memory credentials store, as shown below, but then singleton with ed25519 key-pair will be registered. Consider your own implementation in production.
