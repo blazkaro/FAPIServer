@@ -110,7 +110,7 @@ While the `openid` is special, built-in type, it doesn't need to have specified 
 ## Roadmap
 - [ ] Support for CIBA
 - [ ] Support for application-level request signing between client and authorization server by using `client_assertion` and `DPoP` mechanism. (milestone)
-- [ ] Support for signing userinfo, token introspection and grant querying responses
+- [x] Support for signing userinfo, token introspection and grant querying responses
 - [ ] Support for DPoP revocation after use (the same mechanism as with `client_assertion`)
 - [ ] Add better documentation for project
 - [ ] Add unit tests
