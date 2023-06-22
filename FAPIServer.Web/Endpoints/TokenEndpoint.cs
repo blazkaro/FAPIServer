@@ -29,6 +29,6 @@ public class TokenEndpoint : Endpoint<TokenHttpRequest>
         if (!result.Success)
             return new ErrorActionResult(result.Error!.Value, result.FailureMessage);
 
-        return new TokenResult(result.TokenResponse);
+        return new TokenActionResult(result.TokenResponse);
     }
 }

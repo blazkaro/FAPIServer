@@ -1,39 +1,40 @@
 ﻿using FAPIServer.Models;
 using FAPIServer.ResponseHandling.Models;
 using FAPIServer.Storage.ValueObjects;
+using FAPIServer.Web.Endpoints.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
 namespace FAPIServer.Web.Controllers.Results;
 
-public class TokenIntrospectionResult : IActionResult
+public class TokenIntrospectionActionResult : FapiWebSecureActionResult, IActionResult
 {
-    private readonly TokenIntrospectionResponse _response;
+    private readonly ResultDto _result;
 
-    public TokenIntrospectionResult(TokenIntrospectionResponse response)
+    public TokenIntrospectionActionResult(TokenIntrospectionResponse response)
     {
-        _response = response;
+        _result = new ResultDto
+        {
+            Active = response.Active,
+            ClientId = response.ClientId,
+            TokenType = response.TokenType,
+            NotBefore = response.NotBefore,
+            Expiration = response.Expiration,
+            Sub = response.Sub,
+            Cnf = response.Cnf,
+            AuthorizationDetails = response.AuthorizationDetails,
+            Jti = response.Jti
+        };
     }
 
     public async Task ExecuteResultAsync(ActionContext context)
     {
-        var dto = new ResultDto
-        {
-            Active = _response.Active,
-            ClientId = _response.ClientId,
-            TokenType = _response.TokenType,
-            NotBefore = _response.NotBefore,
-            Expiration = _response.Expiration,
-            Sub = _response.Sub,
-            Cnf = _response.Cnf,
-            AuthorizationDetails = _response.AuthorizationDetails,
-            Jti = _response.Jti
-        };
-
         context.HttpContext.Response.StatusCode = StatusCodes.Status200OK;
-        await context.HttpContext.Response.WriteAsJsonAsync(dto, context.HttpContext.RequestAborted);
+        await context.HttpContext.Response.WriteAsJsonAsync(_result, context.HttpContext.RequestAborted);
     }
+
+    public override object GetResult() => _result;
 
     private sealed class ResultDto
     {

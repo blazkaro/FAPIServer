@@ -6,11 +6,11 @@ using System.Text.Json.Serialization;
 
 namespace FAPIServer.Web.Controllers.Results;
 
-public class TokenResult : IActionResult
+public class TokenActionResult : IActionResult
 {
     private readonly TokenResponse _response;
 
-    public TokenResult(TokenResponse response)
+    public TokenActionResult(TokenResponse response)
     {
         _response = response;
     }

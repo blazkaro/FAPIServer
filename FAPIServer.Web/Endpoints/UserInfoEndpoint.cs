@@ -2,6 +2,7 @@
 using FAPIServer.RequestHandling;
 using FAPIServer.Web.Attributes;
 using FAPIServer.Web.Authentication.PasetoDpop;
+using FAPIServer.Web.Endpoints.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -12,6 +13,7 @@ namespace FAPIServer.Web.Endpoints;
 [Authorize(AuthenticationSchemes = PasetoDpopAuthDefaults.AuthenticationScheme)]
 [RequiredAuthorizationDetailAction(Constants.BuiltInAuthorizationDetails.OpenId.Type)]
 [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+[ServiceFilter(typeof(SecureResponseAttribute), IsReusable = false)]
 public class UserInfoEndpoint : Endpoint
 {
     private readonly IUserInfoHandler _handler;
@@ -28,6 +30,7 @@ public class UserInfoEndpoint : Endpoint
         var atPayload = JsonSerializer.Deserialize<AccessTokenPayload>(User.Claims.Single(p => p.Type == "at_payload").Value)!;
         var userClaims = await _handler.HandleAsync(atPayload, cancellationToken);
 
-        return Ok(userClaims);
+        HttpContext.Items.Add(WebConstants.ResponseAudienceKey, atPayload.ClientId);
+        return new UserInfoActionResult(userClaims);
     }
 }

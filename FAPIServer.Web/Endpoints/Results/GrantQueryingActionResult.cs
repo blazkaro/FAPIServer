@@ -1,27 +1,28 @@
 ﻿using FAPIServer.ResponseHandling.Models;
 using FAPIServer.Storage.ValueObjects;
+using FAPIServer.Web.Endpoints.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
 namespace FAPIServer.Web.Controllers.Results;
 
-public class GrantQueryingResult : IActionResult
+public class GrantQueryingActionResult : FapiWebSecureActionResult, IActionResult
 {
-    private readonly GrantQueryingResponse _response;
+    private readonly ResultDto _result;
 
-    public GrantQueryingResult(GrantQueryingResponse response)
+    public GrantQueryingActionResult(GrantQueryingResponse response)
     {
-        _response = response;
+        _result = new ResultDto { AuthorizationDetails = response.AuthorizationDetails, Claims = response.Claims };
     }
 
     public async Task ExecuteResultAsync(ActionContext context)
     {
-        var dto = new ResultDto { AuthorizationDetails = _response.AuthorizationDetails, Claims = _response.Claims };
-
         context.HttpContext.Response.StatusCode = StatusCodes.Status200OK;
-        await context.HttpContext.Response.WriteAsJsonAsync(dto, context.HttpContext.RequestAborted);
+        await context.HttpContext.Response.WriteAsJsonAsync(_result, context.HttpContext.RequestAborted);
     }
+
+    public override object GetResult() => _result;
 
     private sealed class ResultDto
     {

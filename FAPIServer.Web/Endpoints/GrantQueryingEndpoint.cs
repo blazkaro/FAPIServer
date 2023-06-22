@@ -15,6 +15,7 @@ namespace FAPIServer.Web.Endpoints;
 [RequiredAuthorizationDetailAction(Constants.BuiltInAuthorizationDetails.OpenId.Type,
     Constants.BuiltInAuthorizationDetails.OpenId.Actions.GrantManagementQuery)]
 [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+[ServiceFilter(typeof(SecureResponseAttribute), IsReusable = false)]
 public class GrantQueryingEndpoint : Endpoint<string>
 {
     private readonly IGrantQueryingHandler _handler;
@@ -34,6 +35,7 @@ public class GrantQueryingEndpoint : Endpoint<string>
         if (!result.Success)
             return NotFound();
 
-        return new GrantQueryingResult(result.Response);
+        HttpContext.Items.Add(WebConstants.ResponseAudienceKey, atPayload.ClientId);
+        return new GrantQueryingActionResult(result.Response);
     }
 }

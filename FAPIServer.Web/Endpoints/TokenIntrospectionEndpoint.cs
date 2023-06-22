@@ -1,5 +1,6 @@
 ﻿using FAPIServer.RequestHandling;
 using FAPIServer.RequestHandling.Contexts;
+using FAPIServer.Web.Attributes;
 using FAPIServer.Web.Controllers.Requests;
 using FAPIServer.Web.Controllers.Results;
 using FAPIServer.Web.Extensions;
@@ -9,6 +10,7 @@ namespace FAPIServer.Web.Endpoints;
 
 [Route("fapi/token/introspection")]
 [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+[ServiceFilter(typeof(SecureResponseAttribute), IsReusable = false)]
 public class TokenIntrospectionEndpoint : Endpoint<TokenIntrospectionHttpRequest>
     .WithClientAuthentication
 {
@@ -29,6 +31,7 @@ public class TokenIntrospectionEndpoint : Endpoint<TokenIntrospectionHttpRequest
         if (!result.Success)
             return new ErrorActionResult(result.Error!.Value, result.FailureMessage);
 
-        return new TokenIntrospectionResult(result.Response);
+        HttpContext.Items.Add(WebConstants.ResponseAudienceKey, authRequest.ClientId);
+        return new TokenIntrospectionActionResult(result.Response);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FAPIServer.Services;
+using FAPIServer.Web.Attributes;
 using FAPIServer.Web.Authentication.PasetoDpop;
 using FAPIServer.Web.Services.Default;
 using Microsoft.AspNetCore.Authentication;
@@ -21,6 +22,8 @@ public static class FapiServerBuilderExtensions
 
         builder.Services.AddMemoryCache();
         builder.Services.AddControllers();
+
+        builder.Services.AddScoped<SecureResponseAttribute>();
 
         return builder;
     }
