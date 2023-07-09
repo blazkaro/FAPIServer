@@ -6,9 +6,9 @@ namespace FAPIServer.Services;
 
 public interface IInteractionService
 {
+    Task GrantConsentAsync(ParObject parObject, ValidatedUser validatedUser, CancellationToken cancellationToken = default);
     Task GrantConsentAsync(ParObject parObject, ValidatedUser user, IEnumerable<AuthorizationDetail>? grantedAuthorizationDetails, IEnumerable<string>? grantedClaims,
         CancellationToken cancellationToken = default);
-
     Task DenyConsentAsync(ParObject parObject, CancellationToken cancellationToken = default);
     Task SignedIn(ParObject parObject, CancellationToken cancellationToken = default);
 }

@@ -10,6 +10,8 @@ public class Client
     public Ed25519Key Ed25519PublicKey { get; set; }
     public bool ConsentRequired { get; set; }
     public bool AuthorizationCodeBindingToDpopKeyRequired { get; set; }
+    public string? CibaMode { get; set; }
+    public Uri? BackchannelClientNotificationEndpoint { get; set; }
     public Lifetime RequestUriLifetime { get; set; }
     public Lifetime AuthorizationCodeLifetime { get; set; }
     public Lifetime IdTokenLifetime { get; set; }

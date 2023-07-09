@@ -1,22 +1,19 @@
-﻿using Base64Url;
-using FAPIServer.Storage.Models;
-using FAPIServer.Storage.Stores;
+﻿using FAPIServer.Storage.Models;
 using FAPIServer.Storage.ValueObjects;
 using FAPIServer.Validation.Models;
-using System.Security.Cryptography;
 
 namespace FAPIServer.Services.Default;
 
 public class InteractionService : IInteractionService
 {
     private readonly IAuthorizationRequestPersistenceService _authorizationRequestPersistenceService;
-    private readonly IGrantStore _grantStore;
+    private readonly IGrantManager _grantManager;
 
     public InteractionService(IAuthorizationRequestPersistenceService authorizationRequestPersistenceService,
-        IGrantStore grantStore)
+        IGrantManager grantManager)
     {
         _authorizationRequestPersistenceService = authorizationRequestPersistenceService;
-        _grantStore = grantStore;
+        _grantManager = grantManager;
     }
 
     public async Task DenyConsentAsync(ParObject parObject, CancellationToken cancellationToken = default)
@@ -31,8 +28,8 @@ public class InteractionService : IInteractionService
         }, cancellationToken);
     }
 
-    public async Task GrantConsentAsync(ParObject parObject, ValidatedUser user, IEnumerable<AuthorizationDetail>? grantedAuthorizationDetails, IEnumerable<string>? grantedClaims,
-        CancellationToken cancellationToken = default)
+    public async Task GrantConsentAsync(ParObject parObject, ValidatedUser user, IEnumerable<AuthorizationDetail>? grantedAuthorizationDetails,
+        IEnumerable<string>? grantedClaims, CancellationToken cancellationToken = default)
     {
         if (parObject is null)
             throw new ArgumentNullException(nameof(parObject));
@@ -51,78 +48,47 @@ public class InteractionService : IInteractionService
 
         switch (parObject.GrantManagementAction)
         {
-            case Constants.SupportedGrantManagementActions.Create or null or "":
+            case Constants.GrantManagementActions.Create or null or "":
                 if (!grantedClaims.Contains(Constants.BuiltInClaims.Subject))
                     throw new InvalidOperationException($"The '{Constants.BuiltInClaims.Subject}' claim must be granted");
 
-                var grant = new Grant
-                {
-                    GrantId = Base64UrlEncoder.Encode(RandomNumberGenerator.GetBytes(32)),
-                    ClientId = parObject.ClientId,
-                    Subject = user.Subject,
-                    Claims = grantedClaims.ToList(),
-                    AuthorizationDetails = grantedAuthorizationDetails.ToList(),
-                    GrantedAt = DateTime.UtcNow
-                };
-
-                await _grantStore.StoreAsync(grant, cancellationToken);
+                var grant = await _grantManager.CreateAsync(parObject.ClientId, user.Subject, grantedAuthorizationDetails, grantedClaims,
+                    cancellationToken);
 
                 await _authorizationRequestPersistenceService.UpdateAsync(parObject, update =>
                 {
                     update.WasConsentPageShown = true;
-                    update.FreshGrant = grant;
+                    update.Grant = grant;
                 }, cancellationToken);
 
                 break;
 
-            case Constants.SupportedGrantManagementActions.Merge:
+            case Constants.GrantManagementActions.Merge:
                 await _authorizationRequestPersistenceService.UpdateAsync(parObject, update => update.WasConsentPageShown = true, cancellationToken);
-
-                var currentGrant = parObject.RequestedGrant!;
-
-                if (grantedAuthorizationDetails.Any() && currentGrant.AuthorizationDetails is null)
-                    currentGrant.AuthorizationDetails = new List<AuthorizationDetail>();
-
-                foreach (var authorizationDetail in grantedAuthorizationDetails)
-                {
-                    var toMerge = currentGrant.AuthorizationDetails.SingleOrDefault(p => p.Type == authorizationDetail.Type);
-
-                    if (toMerge != null)
-                        toMerge.Merge(authorizationDetail);
-                    else
-                        currentGrant.AuthorizationDetails.Add(authorizationDetail);
-                }
-
-                if (grantedClaims.Any() && currentGrant.Claims is null)
-                    currentGrant.Claims = new HashSet<string>();
-
-                if (grantedClaims.Any())
-                {
-                    currentGrant.Claims = (currentGrant.Claims ?? new HashSet<string>()).Concat(grantedClaims).ToHashSet();
-                }
-
-                await _grantStore.UpdateAsync(currentGrant.GrantId, update =>
-                {
-                    update.AuthorizationDetails = currentGrant.AuthorizationDetails;
-                    update.Claims = currentGrant.Claims;
-                }, cancellationToken);
+                await _grantManager.MergeAsync(parObject.Grant!, grantedAuthorizationDetails, grantedClaims, cancellationToken);
 
                 break;
 
-            case Constants.SupportedGrantManagementActions.Replace:
+            case Constants.GrantManagementActions.Replace:
                 await _authorizationRequestPersistenceService.UpdateAsync(parObject, update => update.WasConsentPageShown = true, cancellationToken);
-
-                await _grantStore.UpdateAsync(parObject.RequestedGrant!.GrantId, update =>
-                {
-                    update.AuthorizationDetails = grantedAuthorizationDetails.ToHashSet();
-                    update.Claims = grantedClaims.ToHashSet();
-                }, cancellationToken);
+                await _grantManager.ReplaceAsync(parObject.Grant!, grantedAuthorizationDetails, grantedClaims, cancellationToken);
 
                 break;
 
             default:
                 throw new InvalidOperationException($"The '{nameof(parObject.GrantManagementAction)}' is not supported Grant Management Action");
         }
+    }
+
+    public async Task GrantConsentAsync(ParObject parObject, ValidatedUser validatedUser, CancellationToken cancellationToken = default)
+    {
+        if (parObject is null)
+            throw new ArgumentNullException(nameof(parObject));
+
+        if (validatedUser is null)
+            throw new ArgumentNullException(nameof(validatedUser));
+
+        await GrantConsentAsync(parObject, validatedUser, parObject.AuthorizationDetails, parObject.Claims, cancellationToken);
     }
 
     public async Task SignedIn(ParObject parObject, CancellationToken cancellationToken = default)

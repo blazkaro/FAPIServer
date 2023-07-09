@@ -30,7 +30,7 @@ public class DPoPProofValidator : IDPoPProofValidator
             .UseV4(Purpose.Public)
             .DecodeFooter(dpop);
 
-        if (!PaserkHelper.IsK4Public(dpop))
+        if (!PaserkHelper.IsK4Public(paserk))
             return new("The footer is not valid V4 public PASERK");
 
         if (parameters.ValidPkh is not null && parameters.ValidPkh.Any() && !HashAlgorithm.Sha256.Verify(Encoding.UTF8.GetBytes(paserk), parameters.ValidPkh))
@@ -62,7 +62,7 @@ public class DPoPProofValidator : IDPoPProofValidator
         if (payload.Htm.IsNullOrEmpty()) return TokenValidationResult<DPoPPayload>.MissingClaim("htm");
         if (payload.Htu.IsNullOrEmpty()) return TokenValidationResult<DPoPPayload>.MissingClaim("htu");
 
-        if (payload.Htm.Equals(parameters.ValidHtm, StringComparison.OrdinalIgnoreCase))
+        if (!payload.Htm.Equals(parameters.ValidHtm, StringComparison.OrdinalIgnoreCase))
             return TokenValidationResult<DPoPPayload>.InvalidClaim("htm");
 
         if (!payload.Htu.Equals(parameters.ValidHtu.ToString(), StringComparison.OrdinalIgnoreCase))

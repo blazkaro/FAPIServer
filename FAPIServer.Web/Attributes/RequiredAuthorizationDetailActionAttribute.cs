@@ -1,4 +1,4 @@
-﻿using FAPIServer.Extensions;
+﻿using FAPIServer.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -19,17 +19,21 @@ public class RequiredAuthorizationDetailActionAttribute : Attribute, IAuthorizat
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        var accessToken = context.HttpContext.User;
-        if (accessToken.Identity is null || !accessToken.Identity.IsAuthenticated)
+        var claimsPrincipal = context.HttpContext.User;
+        if (claimsPrincipal.Identity is null || !claimsPrincipal.Identity.IsAuthenticated || !claimsPrincipal.HasClaim(p => p.Type == "at_payload"))
         {
             InsufficentScope(context);
             return;
         }
 
-        var authorizationDetails = AuthorizationDetailExtensions.ReadFromJson(accessToken.Claims.SingleOrDefault(p => p.Type == "authorization_details")?.Value,
-            out _);
+        var accessToken = AccessTokenPayload.FromJson(claimsPrincipal.Claims.SingleOrDefault(p => p.Type == "at_payload")!.Value);
+        if (accessToken is null)
+        {
+            InsufficentScope(context);
+            return;
+        }
 
-        var authorizationDetail = authorizationDetails.SingleOrDefault(p => p.Type == _requiredType);
+        var authorizationDetail = accessToken.AuthorizationDetails?.SingleOrDefault(p => p.Type == _requiredType);
         if (authorizationDetail is null || !_requiredActions.All(authorizationDetail.Actions.ContainsKey))
         {
             InsufficentScope(context);

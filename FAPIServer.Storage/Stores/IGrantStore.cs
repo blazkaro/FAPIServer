@@ -9,5 +9,5 @@ public interface IGrantStore
     Task<IEnumerable<Grant>> FindAllBySubjectAndClientId(string subject, string clientId, CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(string grantId, string clientId, CancellationToken cancellationToken = default);
     Task RemoveAsync(string grantId, CancellationToken cancellationToken = default);
-    Task UpdateAsync(string grantId, Action<Grant> update, CancellationToken cancellationToken = default);
+    //Task UpdateAsync(Grant grant, CancellationToken cancellationToken = default, params Expression<Func<Grant, object>>[] properties);
 }

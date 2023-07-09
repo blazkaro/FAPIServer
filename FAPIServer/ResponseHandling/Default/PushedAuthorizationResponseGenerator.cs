@@ -35,7 +35,7 @@ public class PushedAuthorizationResponseGenerator : IPushedAuthorizationResponse
             Nonce = validatedRequest.RawRequest.Nonce,
             CodeChallengeMethod = validatedRequest.RawRequest.CodeChallengeMethod,
             CodeChallenge = new Base64UrlEncodedString(validatedRequest.RawRequest.CodeChallenge),
-            RequestedGrant = validatedRequest.RequestedGrant,
+            Grant = validatedRequest.RequestedGrant,
             GrantManagementAction = validatedRequest.RawRequest.GrantManagementAction,
             Prompt = validatedRequest.RawRequest.Prompt,
             MaxAge = validatedRequest.RawRequest.MaxAge,

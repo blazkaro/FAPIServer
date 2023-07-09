@@ -40,7 +40,7 @@ public class AuthorizationRequestValidator : IAuthorizationRequestValidator
             return new(Error.InvalidRequest, $"The 'request_uri' must starts with '{Constants.RequestUriUrn}'");
 
         var client = await _clientStore.FindEnabledByClientIdAsync(request.ClientId, cancellationToken);
-        if (client == null || !client.AllowedGrantTypes.Contains(Constants.SupportedGrantTypes.AuthorizationCode))
+        if (client == null || !client.AllowedGrantTypes.Contains(Constants.GrantTypes.AuthorizationCode))
             return new(Error.UnauthorizedClient, "The client not found or is not authorized");
 
         var parObject = await _authorizationRequestPersistenceService.ReadAsync(request, cancellationToken);
@@ -69,7 +69,7 @@ public class AuthorizationRequestValidator : IAuthorizationRequestValidator
                 Nonce = parObject.Nonce,
                 CodeChallengeMethod = parObject.CodeChallengeMethod,
                 CodeChallenge = parObject.CodeChallenge.Value,
-                GrantId = parObject.RequestedGrant?.GrantId,
+                GrantId = parObject.Grant?.GrantId,
                 GrantManagementAction = parObject.GrantManagementAction,
                 DPoPPkh = parObject.DPoPPkh?.Value,
                 Prompt = parObject.Prompt,

@@ -54,6 +54,13 @@ public class ErrorActionResult : IActionResult
             Error.UnsupportedGrantType => new("unsupported_grant_type", StatusCodes.Status400BadRequest),
             Error.InvalidGrant => new("invalid_grant", StatusCodes.Status400BadRequest),
             Error.InvalidDPoPProof => new("invalid_dpop_proof", StatusCodes.Status400BadRequest),
+            Error.UnknownUserId => new("unknown_user_id", StatusCodes.Status400BadRequest),
+            Error.MissingUserCode => new("missing_user_code", StatusCodes.Status400BadRequest),
+            Error.InvalidUserCode => new("invalid_user_code", StatusCodes.Status400BadRequest),
+            Error.InvalidBindingMessage => new("invalid_binding_message", StatusCodes.Status400BadRequest),
+            Error.AuthorizationPending => new("authorization_pending", StatusCodes.Status400BadRequest),
+            Error.ExpiredToken => new("expired_token", StatusCodes.Status400BadRequest),
+            Error.AccessDenied => new("access_denied", StatusCodes.Status403Forbidden),
             _ => new("unexpected_error", StatusCodes.Status500InternalServerError)
         };
     }

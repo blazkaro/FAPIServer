@@ -15,10 +15,9 @@ public class ParObjectStore : IParObjectStore
 
     public async Task<ParObject?> FindByUriAndClientIdAsync(string uri, string clientId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.ParObjects.AsNoTrackingWithIdentityResolution()
+        return await _dbContext.ParObjects.AsNoTracking()
             .Where(p => p.Uri == uri && p.ClientId == clientId)
-            .Include(p => p.RequestedGrant)
-            .Include(p => p.FreshGrant)
+            .Include(p => p.Grant)
             .SingleOrDefaultAsync(cancellationToken);
     }
 
@@ -26,31 +25,17 @@ public class ParObjectStore : IParObjectStore
     {
         _dbContext.ParObjects.Remove(new ParObject { Uri = uri });
         await _dbContext.SaveChangesAsync(cancellationToken);
+
     }
 
     public async Task StoreAsync(ParObject parObject, CancellationToken cancellationToken = default)
     {
-        if (parObject.RequestedGrant is not null && _dbContext.Grants.Entry(parObject.RequestedGrant).State == EntityState.Detached)
+        if (parObject.Grant is not null && _dbContext.Grants.Entry(parObject.Grant).State == EntityState.Detached)
         {
-            _dbContext.Grants.Attach(parObject.RequestedGrant);
+            _dbContext.Grants.Attach(parObject.Grant);
         }
 
-        if (parObject.FreshGrant is not null && _dbContext.Grants.Entry(parObject.FreshGrant).State == EntityState.Detached)
-        {
-            _dbContext.Grants.Attach(parObject.FreshGrant);
-        }
-
-        await _dbContext.ParObjects.AddAsync(parObject, cancellationToken);
+        _dbContext.ParObjects.Add(parObject);
         await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task UpdateAsync(string uri, Action<ParObject> update, CancellationToken cancellationToken = default)
-    {
-        var entity = await _dbContext.ParObjects.FindAsync(new string[] { uri }, cancellationToken);
-        if (entity != null)
-        {
-            update(entity);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
     }
 }

@@ -29,6 +29,9 @@ public class TokenHttpRequest : TokenRequest
     [FromForm(Name = "refresh_token")]
     public override string? RefreshToken { get => base.RefreshToken; set => base.RefreshToken = value; }
 
+    [FromForm(Name = "auth_req_id")]
+    public override string? AuthReqId { get => base.AuthReqId; set => base.AuthReqId = value; }
+
     [FromHeader(Name = "DPoP")]
     public override string? DPoP { get => base.DPoP; set => base.DPoP = value; }
 }

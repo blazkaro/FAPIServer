@@ -24,5 +24,9 @@ public class ParObjectConfiguration : IEntityTypeConfiguration<ParObject>
 
         builder.Property(p => p.DPoPPkh)
             .HasConversion<Base64UrlEncodedStringConverter>();
+
+        builder.HasOne(p => p.Grant)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

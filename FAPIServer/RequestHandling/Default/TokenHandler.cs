@@ -37,6 +37,7 @@ public class TokenHandler : ITokenHandler
             authResult.Client,
             new DPoPValidationParameters(context.RequestedUri, context.RequestedMethod));
 
+        // TODO: Long polling?
         var validationResult = await _requestValidator.ValidateAsync(validationContext, cancellationToken);
         if (!validationResult.IsValid)
             return new(validationResult.Error, validationResult.FailureMessage);

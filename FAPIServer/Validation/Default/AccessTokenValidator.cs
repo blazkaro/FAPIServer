@@ -45,25 +45,25 @@ public class AccessTokenValidator : IAccessTokenValidator
         if (!validationResult.IsValid)
             return new(validationResult.Exception.Message);
 
-        var atPayload = AccessTokenPayload.FromJson(validationResult.Paseto.RawPayload)!;
-        if (atPayload.NotBefore == default)
+        var payload = AccessTokenPayload.FromJson(validationResult.Paseto.RawPayload)!;
+        if (payload.NotBefore == default)
             return TokenValidationResult<AccessTokenPayload>.MissingClaim(PasetoRegisteredClaimNames.NotBefore);
 
-        if (atPayload.Jti == Guid.Empty)
+        if (payload.Jti == Guid.Empty)
             return TokenValidationResult<AccessTokenPayload>.MissingClaim(PasetoRegisteredClaimNames.TokenIdentifier);
 
-        if (atPayload.ClientId.IsNullOrEmpty())
+        if (payload.ClientId.IsNullOrEmpty())
             return TokenValidationResult<AccessTokenPayload>.MissingClaim("client_id");
 
-        if (atPayload.Cnf is null)
+        if (payload.Cnf is null)
             return TokenValidationResult<AccessTokenPayload>.MissingClaim("cnf");
 
-        if (atPayload.Cnf.Pkh.IsNullOrEmpty())
+        if (payload.Cnf.Pkh.IsNullOrEmpty())
             return new("The 'pkh' property must be present in 'cnf' object");
 
-        if (await _revokedAccessTokenStore.IsRevokedAsync(atPayload.Jti.ToString(), cancellationToken))
+        if (await _revokedAccessTokenStore.IsRevokedAsync(payload.Jti.ToString(), cancellationToken))
             return new("The access token is revoked");
 
-        return new(atPayload);
+        return new(payload);
     }
 }

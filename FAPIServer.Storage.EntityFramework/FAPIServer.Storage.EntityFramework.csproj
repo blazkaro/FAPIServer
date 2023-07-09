@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.1</Version>
+		<Version>2.0.0</Version>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Authors>blazkaro</Authors>
 		<Description>Implementation of storage layer for FAPI Server using EntityFramework</Description>
@@ -28,8 +28,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FAPIServer.Storage" Version="1.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.7" />
+		<PackageReference Include="FAPIServer.Storage" Version="2.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
 	</ItemGroup>
 
 	<ItemGroup>

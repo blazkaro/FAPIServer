@@ -22,6 +22,13 @@ public class ValidatedTokenRequest : ValidatedRequest<TokenRequest>
         RefreshToken = refreshToken;
     }
 
+    public ValidatedTokenRequest(TokenRequest rawRequest, Client client, CibaObject? cibaObject)
+        : base(rawRequest, client)
+    {
+        CibaObject = cibaObject;
+    }
+
     public AuthorizationCode? AuthorizationCode { get; init; }
     public RefreshToken? RefreshToken { get; init; }
+    public CibaObject? CibaObject { get; init; }
 }

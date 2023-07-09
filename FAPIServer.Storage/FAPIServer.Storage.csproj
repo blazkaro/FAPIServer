@@ -4,7 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.0.2</Version>
+		<Version>2.0.0</Version>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<Authors>blazkaro</Authors>
 		<Description>Defines core models and storage abstraction layer for FAPI Server</Description>
@@ -34,10 +34,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 </Project>

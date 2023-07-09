@@ -13,9 +13,9 @@ public class AuthorizationDetailSchemaStore : IAuthorizationDetailSchemaStore
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<AuthorizationDetailSchema>> FindByTypesAsync(IEnumerable<string> types, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<AuthorizationDetailSchema>> FindEnabledByTypesAsync(IEnumerable<string> types, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.AuthorizationDetailSchemas.AsNoTrackingWithIdentityResolution()
+        return await _dbContext.AuthorizationDetailSchemas.AsNoTracking()
             .Where(p => p.Enabled && types.Contains(p.Type))
             .Select(p => new AuthorizationDetailSchema
             {

@@ -1,20 +1,18 @@
-﻿using JetBrains.Annotations;
-
-namespace FAPIServer;
+﻿namespace FAPIServer;
 
 public static class Constants
 {
-    public static class SupportedClientAssertionTypes
+    public static class ClientAssertionTypes
     {
         public const string PasetoBearer = "urn:ietf:params:oauth:client-assertion-type:paseto-bearer";
     }
 
-    public static class SupportedClientAuthenticationMethods
+    public static class ClientAuthenticationMethods
     {
         public const string PrivateKeyPaseto = "private_key_paseto";
     }
 
-    public static class SupportedGrantTypes
+    public static class GrantTypes
     {
         public const string AuthorizationCode = "authorization_code";
         public const string ClientCredentials = "client_credentials";
@@ -45,17 +43,17 @@ public static class Constants
 
     public const string RequestUriUrn = "urn:ietf:params:oauth:request_uri:";
 
-    public static class SupportedCodeChallengeMethods
+    public static class CodeChallengeMethods
     {
         public const string S256 = "S256";
     }
 
-    public static class SupportedAccessTokenTypes
+    public static class AccessTokenTypes
     {
         public const string DPoP = "DPoP";
     }
 
-    public static class SupportedGrantManagementActions
+    public static class GrantManagementActions
     {
         public const string Create = "create";
         public const string Merge = "merge";
@@ -64,10 +62,18 @@ public static class Constants
         public static readonly string[] Actions = { Create, Merge, Replace };
     }
 
-    public static class SupportedPromptTypes
+    public static class PromptTypes
     {
         public const string Login = "login";
 
         public static readonly string[] Types = { Login };
     }
+
+    public static class CibaModes
+    {
+        public const string Poll = "poll";
+        public const string Ping = "ping";
+    }
+
+    public const string CibaNotificationHttpClientName = "CIBA-CLIENT-NOTIFICATION";
 }

@@ -5,7 +5,6 @@ using FAPIServer.Validation.Contexts;
 using FAPIServer.Validation.Models;
 using FAPIServer.Validation.Results;
 using NSec.Cryptography;
-using System.Text.Json;
 
 namespace FAPIServer.Validation.Default;
 
@@ -15,16 +14,19 @@ public class TokenRequestValidator : ITokenRequestValidator
     private readonly IDPoPProofValidator _dpopProofValidator;
     private readonly IRefreshTokenStore _refreshTokenStore;
     private readonly IResourceValidator _resourceValidator;
+    private readonly ICibaObjectStore _cibaObjectStore;
 
     public TokenRequestValidator(IAuthorizationCodeStore authorizationCodeStore,
         IDPoPProofValidator dpopProofValidator,
         IRefreshTokenStore refreshTokenStore,
-        IResourceValidator resourceValidator)
+        IResourceValidator resourceValidator,
+        ICibaObjectStore cibaObjectStore)
     {
         _authorizationCodeStore = authorizationCodeStore;
         _dpopProofValidator = dpopProofValidator;
         _refreshTokenStore = refreshTokenStore;
         _resourceValidator = resourceValidator;
+        _cibaObjectStore = cibaObjectStore;
     }
 
     public async Task<TokenRequestValidationResult> ValidateAsync(TokenRequestValidationContext context, CancellationToken cancellationToken = default)
@@ -35,7 +37,7 @@ public class TokenRequestValidator : ITokenRequestValidator
         if (context.Request.GrantType.IsNullOrEmpty())
             return new(Error.InvalidRequest, ErrorDescriptions.MissingParameter("grant_type"));
 
-        if (!Constants.SupportedGrantTypes.Types.Contains(context.Request.GrantType))
+        if (!Constants.GrantTypes.Types.Contains(context.Request.GrantType))
             return new(Error.UnsupportedGrantType, ErrorDescriptions.NotSupportedValue(context.Request.GrantType, "grant_type"));
 
         if (!context.Client.AllowedGrantTypes.Contains(context.Request.GrantType))
@@ -43,9 +45,10 @@ public class TokenRequestValidator : ITokenRequestValidator
 
         return context.Request.GrantType switch
         {
-            Constants.SupportedGrantTypes.AuthorizationCode => await ValidateAgainstAuthorizationCodeGrant(context, cancellationToken),
-            Constants.SupportedGrantTypes.ClientCredentials => await ValidateAgainstClientCredentialsGrant(context, cancellationToken),
-            Constants.SupportedGrantTypes.RefreshToken => await ValidateAgainstRefreshTokenGrant(context, cancellationToken)
+            Constants.GrantTypes.AuthorizationCode => await ValidateAgainstAuthorizationCodeGrant(context, cancellationToken),
+            Constants.GrantTypes.ClientCredentials => await ValidateAgainstClientCredentialsGrant(context, cancellationToken),
+            Constants.GrantTypes.RefreshToken => await ValidateAgainstRefreshTokenGrant(context, cancellationToken),
+            Constants.GrantTypes.Ciba => await ValidateAgainstCibaGrant(context, cancellationToken)
             // No need for default case, because it was validated whether requested grant type is supported
         };
     }
@@ -95,7 +98,8 @@ public class TokenRequestValidator : ITokenRequestValidator
     private async Task<TokenRequestValidationResult> ValidateAgainstClientCredentialsGrant(TokenRequestValidationContext context, CancellationToken cancellationToken)
     {
         var resourcesValidationResult = await _resourceValidator.ValidateAsync(new ResourceValidationContext(context.Client,
-            null, context.Request.AuthorizationDetails, null), cancellationToken);
+            null, context.Request.AuthorizationDetails, null, Constants.GrantTypes.ClientCredentials),
+            cancellationToken);
 
         if (!resourcesValidationResult.IsValid)
             return new(resourcesValidationResult.Error, resourcesValidationResult.FailureMessage);
@@ -106,10 +110,6 @@ public class TokenRequestValidator : ITokenRequestValidator
             if (!validationResult.IsValid)
                 return new(Error.InvalidDPoPProof, validationResult.FailureMessage);
         }
-
-        // Override because using client_credentials grant the 'openid' authorization detail cannot be requested
-        context.Request.AuthorizationDetails = JsonSerializer.Serialize(
-            resourcesValidationResult.AuthorizationDetails.ExceptBy(new string[] { Constants.BuiltInAuthorizationDetails.OpenId.Type }, by => by.Type));
 
         return new(new ValidatedTokenRequest(context.Request, context.Client));
     }
@@ -138,5 +138,43 @@ public class TokenRequestValidator : ITokenRequestValidator
         }
 
         return new(new ValidatedTokenRequest(context.Request, context.Client, refreshToken));
+    }
+
+    private async Task<TokenRequestValidationResult> ValidateAgainstCibaGrant(TokenRequestValidationContext context, CancellationToken cancellationToken)
+    {
+        if (context.Request.AuthReqId.IsNullOrEmpty())
+            return new(Error.InvalidRequest, ErrorDescriptions.MissingParameter("auth_req_id"));
+
+        var cibaObject = await _cibaObjectStore.FindByIdAndClientIdAsync(context.Request.AuthReqId, context.Client.ClientId, cancellationToken);
+        if (cibaObject is null)
+            return new(Error.InvalidGrant, "The 'auth_req_id' not found");
+
+        if (cibaObject.HasExpired())
+            return new(Error.ExpiredToken, "The 'auth_req_id' has expired");
+
+        if (!cibaObject.IsCompleted)
+            return new(Error.AuthorizationPending, "The user hasn't yet been authorized");
+
+        // We don't check if user "implicitly" denied access e.g. by disallowing every requested access, because it's role of handler used to interact with user
+        // while CIBA authorization process. It should detect this implicit deniation and set AccessDenied property to true
+        if (cibaObject.AccessDenied)
+            return new(Error.AccessDenied, "The user denied access");
+
+        if (cibaObject.DPoPPkh is not null)
+        {
+            if (context.Request.DPoP.IsNullOrEmpty())
+                return new(Error.InvalidDPoPProof, "The DPoP proof is required");
+
+            context.DPoPValidationParameters.ValidPkh = cibaObject.DPoPPkh.Decode();
+        }
+
+        if (!context.Request.DPoP.IsNullOrEmpty())
+        {
+            var validationResult = _dpopProofValidator.Validate(context.Request.DPoP, context.DPoPValidationParameters);
+            if (!validationResult.IsValid)
+                return new(Error.InvalidDPoPProof, validationResult.FailureMessage);
+        }
+
+        return new(new ValidatedTokenRequest(context.Request, context.Client, cibaObject));
     }
 }

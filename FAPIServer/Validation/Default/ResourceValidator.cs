@@ -69,8 +69,11 @@ public class ResourceValidator : IResourceValidator
         if (!authorizationDetails.Any())
             return new(null, null, null);
 
+        if (authorizationDetails.Any(p => p.Type == Constants.BuiltInAuthorizationDetails.OpenId.Type) && context.GrantType == Constants.GrantTypes.ClientCredentials)
+            return new(Error.InvalidAuthorizationDetails, "The 'openid' type cannot be requested using 'client_credentials' grant");
+
         // Get all to avoid calling it in loop
-        var schemas = await _authorizationDetailSchemaStore.FindByTypesAsync(authorizationDetails.Select(p => p.Type), cancellationToken);
+        var schemas = await _authorizationDetailSchemaStore.FindEnabledByTypesAsync(authorizationDetails.Select(p => p.Type), cancellationToken);
 
         foreach (var authorizationDetail in authorizationDetails)
         {
@@ -133,9 +136,14 @@ public class ResourceValidator : IResourceValidator
     private async Task<ResourceValidationResult> ValidateClaims(ResourceValidationContext context, CancellationToken cancellationToken)
     {
         var requestedClaims = context.RequestedClaims?.FromSpaceDelimitedString();
+        if (context.GrantManagementAction != Constants.GrantManagementActions.Merge
+            && (context.GrantType == Constants.GrantTypes.AuthorizationCode || context.GrantType == Constants.GrantTypes.Ciba)
+            && (requestedClaims is null || !requestedClaims.Contains(Constants.BuiltInClaims.Subject)))
+            return new(Error.InvalidClaims, $"The '{Constants.BuiltInClaims.Subject}' must be requested");
+
         if (requestedClaims is not null)
         {
-            var claims = await _claimsStore.FindByTypesAsync(requestedClaims, cancellationToken);
+            var claims = await _claimsStore.FindEnabledByTypesAsync(requestedClaims, cancellationToken);
             if (requestedClaims.Count() != claims.Count() || claims.Any(p => !p.Enabled))
                 return new(Error.InvalidClaims, "The requested claims are not supported");
 
@@ -167,7 +175,7 @@ public class ResourceValidator : IResourceValidator
         var grantedAuthorizationDetail = context.RequestedGrant?.AuthorizationDetails.SingleOrDefault(p => p.Type == current.Type);
         return grantedAuthorizationDetail is null
             || (!action.IsNullOrEmpty() && !grantedAuthorizationDetail.Actions.ContainsKey(action))
-            || context.GrantManagementAction != Constants.SupportedGrantManagementActions.Merge
+            || context.GrantManagementAction != Constants.GrantManagementActions.Merge
             || !errors.SelectMany(p => p.Types).All(p => p == "required");
     }
 

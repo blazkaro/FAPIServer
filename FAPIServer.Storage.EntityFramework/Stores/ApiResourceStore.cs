@@ -15,7 +15,7 @@ public class ApiResourceStore : IApiResourceStore
 
     public async Task<ApiResource?> FindByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.ApiResources.AsNoTrackingWithIdentityResolution()
+        return await _dbContext.ApiResources.AsNoTracking()
             .Where(p => p.Enabled && p.Client.ClientId == clientId)
             .Select(p => new ApiResource
             {
@@ -29,7 +29,7 @@ public class ApiResourceStore : IApiResourceStore
 
     public async Task<IEnumerable<ApiResource>> FindByUrisAsync(IEnumerable<Uri> uris, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.ApiResources.AsNoTrackingWithIdentityResolution()
+        return await _dbContext.ApiResources.AsNoTracking()
             .Where(p => p.Enabled && uris.Contains(p.Uri))
             .Select(p => new ApiResource
             {

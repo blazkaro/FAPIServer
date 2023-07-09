@@ -15,7 +15,7 @@ public class ClientStore : IClientStore
 
     public async Task<Client?> FindEnabledByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Clients.AsNoTrackingWithIdentityResolution()
+        return await _dbContext.Clients.AsNoTracking()
             .Where(p => p.ClientId == clientId)
             .Select(p => new Client
             {
@@ -24,6 +24,8 @@ public class ClientStore : IClientStore
                 Ed25519PublicKey = p.Ed25519PublicKey,
                 ConsentRequired = p.ConsentRequired,
                 AuthorizationCodeBindingToDpopKeyRequired = p.AuthorizationCodeBindingToDpopKeyRequired,
+                CibaMode = p.CibaMode,
+                BackchannelClientNotificationEndpoint = p.BackchannelClientNotificationEndpoint,
                 RequestUriLifetime = p.RequestUriLifetime,
                 AuthorizationCodeLifetime = p.AuthorizationCodeLifetime,
                 IdTokenLifetime = p.IdTokenLifetime,

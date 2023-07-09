@@ -4,5 +4,5 @@ namespace FAPIServer.Storage.Stores;
 
 public interface IClaimsStore : IDiscoveryStore
 {
-    Task<IEnumerable<UserClaim>> FindByTypesAsync(IEnumerable<string> types, CancellationToken cancellationToken = default);
+    Task<IEnumerable<UserClaim>> FindEnabledByTypesAsync(IEnumerable<string> types, CancellationToken cancellationToken = default);
 }

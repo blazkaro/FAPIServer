@@ -21,13 +21,13 @@ public class GrantManagementValidator : IGrantManagementValidator
 
         switch (context.GrantManagementAction)
         {
-            case Constants.SupportedGrantManagementActions.Create:
+            case Constants.GrantManagementActions.Create:
                 if (!context.GrantId.IsNullOrEmpty())
                     return new(Error.InvalidRequest, "The 'grant_id' cannot be present when 'grant_management_action'='create'");
 
                 break;
 
-            case Constants.SupportedGrantManagementActions.Merge or Constants.SupportedGrantManagementActions.Replace:
+            case Constants.GrantManagementActions.Merge or Constants.GrantManagementActions.Replace:
                 if (context.GrantId.IsNullOrEmpty())
                     return new(Error.InvalidRequest, $"The 'grant_id' must be present when 'grant_management_action'='{context.GrantManagementAction}'");
 

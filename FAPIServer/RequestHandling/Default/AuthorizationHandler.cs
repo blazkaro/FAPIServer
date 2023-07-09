@@ -46,7 +46,7 @@ public class AuthorizationHandler : IAuthorizationHandler
         if (!validatedRequest.ParObject.HasBeenActivated)
             await _authorizationRequestPersistenceService.PersistAsync(validatedRequest.ParObject, cancellationToken);
 
-        if ((validatedRequest.ParObject.Prompt == Constants.SupportedPromptTypes.Login && !validatedRequest.ParObject.WasUserReauthenticated)
+        if ((validatedRequest.ParObject.Prompt == Constants.PromptTypes.Login && !validatedRequest.ParObject.WasUserReauthenticated)
             || context.User is null || context.User.GetSubject().IsNullOrEmpty())
             return AuthorizationHandlerResult.AskForAuthentication();
 
@@ -69,9 +69,9 @@ public class AuthorizationHandler : IAuthorizationHandler
 
         return validatedRequest.ParObject.GrantManagementAction switch
         {
-            Constants.SupportedGrantManagementActions.Create => await HandleCreateAction(context, validatedRequest, cancellationToken),
-            Constants.SupportedGrantManagementActions.Merge => await HandleMergeAction(context, validatedRequest, cancellationToken),
-            Constants.SupportedGrantManagementActions.Replace => await HandleReplaceAction(context, validatedRequest, cancellationToken),
+            Constants.GrantManagementActions.Create => await HandleCreateAction(context, validatedRequest, cancellationToken),
+            Constants.GrantManagementActions.Merge => await HandleMergeAction(context, validatedRequest, cancellationToken),
+            Constants.GrantManagementActions.Replace => await HandleReplaceAction(context, validatedRequest, cancellationToken),
             _ => await HandleDefault(context, validatedRequest, cancellationToken)
         };
     }
@@ -83,11 +83,11 @@ public class AuthorizationHandler : IAuthorizationHandler
             return AuthorizationHandlerResult.AskForConsent();
 
         // If true, the user didn't gave consent
-        if (validatedRequest.ParObject.FreshGrant is null)
+        if (validatedRequest.ParObject.Grant is null)
             return await SendInteractionError(context, validatedRequest, InteractionError.AccessDenied, cancellationToken);
 
         // Probably impossible to happen, but check it anyway
-        if (validatedRequest.ParObject.FreshGrant.Subject != context.GetValidUser().Subject)
+        if (validatedRequest.ParObject.Grant.Subject != context.GetValidUser().Subject)
             return new(Error.InvalidGrantId, "The grant was created but assigned to different user. More than 1 user wants to use the same request URI");
 
         return new(await _responseGenerator.GenerateAsync(context, validatedRequest, cancellationToken: cancellationToken));
@@ -96,10 +96,10 @@ public class AuthorizationHandler : IAuthorizationHandler
     private async Task<AuthorizationHandlerResult> HandleMergeAction(AuthorizationContext context, ValidatedAuthorizationRequest validatedRequest,
         CancellationToken cancellationToken)
     {
-        if (validatedRequest.ParObject.RequestedGrant is null)
-            throw new InvalidOperationException($"The {nameof(validatedRequest.ParObject.RequestedGrant)} cannot be null here");
+        if (validatedRequest.ParObject.Grant is null)
+            throw new InvalidOperationException($"The {nameof(validatedRequest.ParObject.Grant)} cannot be null here");
 
-        if (validatedRequest.ParObject.RequestedGrant.Subject != context.GetValidUser().Subject)
+        if (validatedRequest.ParObject.Grant.Subject != context.GetValidUser().Subject)
             return new(Error.InvalidGrantId, "The requested grant subject is different than authenticated user");
 
         if (!validatedRequest.ParObject.WasConsentPageShown)
@@ -111,15 +111,15 @@ public class AuthorizationHandler : IAuthorizationHandler
             else
             {
                 if (IsFreshConsentRequired(validatedRequest)
-                    || !IsGrantAllowingSameOrMoreAccessComparedToRequested(validatedRequest.ParObject.RequestedGrant, validatedRequest))
+                    || !IsGrantAllowingSameOrMoreAccessComparedToRequested(validatedRequest.ParObject.Grant, validatedRequest))
                     return AuthorizationHandlerResult.AskForConsent();
 
                 return new(await _responseGenerator.GenerateAsync(context, validatedRequest, cancellationToken: cancellationToken));
             }
         }
 
-        // The consent was shown, so use requested grant because in case of merge we update existing, not creating a new one.
-        // So the requested grant will be updated (merged) grant
+        // The consent was shown, so use requested grant because in case of merge we  existing, not creating a new one.
+        // So the requested grant will be d (merged) grant
         return new(await _responseGenerator.GenerateAsync(context, validatedRequest, cancellationToken: cancellationToken));
     }
 
@@ -130,10 +130,10 @@ public class AuthorizationHandler : IAuthorizationHandler
             return AuthorizationHandlerResult.AskForConsent();
 
         // It was validated whether grant exists, so if now it's null then user revoked it
-        if (validatedRequest.ParObject.RequestedGrant is null)
-            throw new InvalidOperationException($"The {nameof(validatedRequest.ParObject.RequestedGrant)} cannot be null here");
+        if (validatedRequest.ParObject.Grant is null)
+            throw new InvalidOperationException($"The {nameof(validatedRequest.ParObject.Grant)} cannot be null here");
 
-        if (validatedRequest.ParObject.RequestedGrant.Subject != context.GetValidUser().Subject)
+        if (validatedRequest.ParObject.Grant.Subject != context.GetValidUser().Subject)
             return new(Error.InvalidGrantId, "The requested grant subject is different than authenticated user");
 
         // In case of replace, we replace access given earlier in grant, but the grant is still the same (has the same id), so use requested grant
@@ -195,7 +195,7 @@ public class AuthorizationHandler : IAuthorizationHandler
 
         if (!claimsNotGranted.Any() || !validatedRequest.ParObject.AuthorizationDetails.IsIncludedIn(grant.AuthorizationDetails))
             return false;
-
+        
         return true;
     }
 }

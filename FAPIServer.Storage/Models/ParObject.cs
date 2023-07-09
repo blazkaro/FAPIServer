@@ -13,13 +13,14 @@ public class ParObject
     public string Nonce { get; set; }
     public string CodeChallengeMethod { get; set; }
     public Base64UrlEncodedString CodeChallenge { get; set; }
-    public Grant? RequestedGrant { get; set; }
+    public Grant? Grant { get; set; }
+    //public Grant? RequestedGrant { get; set; }
     public string? GrantManagementAction { get; set; }
     public string? Prompt { get; set; }
     public int? MaxAge { get; set; }
     public Base64UrlEncodedString? DPoPPkh { get; set; }
     public DateTime ExpiresAt { get; set; }
-    public Grant? FreshGrant { get; set; }
+    //public Grant? FreshGrant { get; set; }
     public string? Sid { get; set; }
     public bool WasUserReauthenticated { get; set; } = false;
     public bool WasConsentPageShown { get; set; } = false;

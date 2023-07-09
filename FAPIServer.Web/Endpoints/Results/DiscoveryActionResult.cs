@@ -25,6 +25,7 @@ public class DiscoveryActionResult : IActionResult
             TokenRevocationEndpoint = _response.TokenRevocationEndpoint,
             TokenIntrospectionEndpoint = _response.TokenIntrospectionEndpoint,
             GrantManagementEndpoint = _response.GrantManagementEndpoint,
+            BackchannelAuthenticationEndpoint = _response.BackchannelAuthenticationEndpoint,
             RequirePushedAuthorizationRequests = _response.RequirePushedAuthorizationRequests,
             GrantManagementActionRequired = _response.GrantManagementActionRequired,
             PaserksUri = _response.PaserksUri,
@@ -34,7 +35,9 @@ public class DiscoveryActionResult : IActionResult
             ResponseTypesSupported = _response.ResponseTypesSupported,
             GrantTypesSupported = _response.GrantTypesSupported,
             AuthMethodsSupported = _response.AuthMethodsSupported,
-            CodeChallengeMethodsSupported = _response.CodeChallengeMethodsSupported
+            CodeChallengeMethodsSupported = _response.CodeChallengeMethodsSupported,
+            BackchannelTokenDeliveryModesSupported = _response.BackchannelTokenDeliveryModesSupported,
+            BackchannelUserCodeParameterSupported = _response.BackchannelUserCodeParameterSupported
         };
 
         context.HttpContext.Response.StatusCode = StatusCodes.Status200OK;
@@ -64,11 +67,17 @@ public class DiscoveryActionResult : IActionResult
         [JsonPropertyName("grant_management_endpoint")]
         public string GrantManagementEndpoint { get; set; }
 
+        [JsonPropertyName("backchannel_authentication_endpoint")]
+        public string BackchannelAuthenticationEndpoint { get; set; }
+
         [JsonPropertyName("require_pushed_authorization_requests")]
         public bool RequirePushedAuthorizationRequests { get; set; }
 
         [JsonPropertyName("grant_management_action_required")]
         public bool GrantManagementActionRequired { get; set; }
+
+        [JsonPropertyName("backchannel_user_code_parameter_supported")]
+        public bool BackchannelUserCodeParameterSupported { get; set; }
 
         [JsonPropertyName("paserks_uri")]
         public string PaserksUri { get; set; }
@@ -93,5 +102,8 @@ public class DiscoveryActionResult : IActionResult
 
         [JsonPropertyName("code_challenge_methods_supported")]
         public IEnumerable<string> CodeChallengeMethodsSupported { get; set; }
+
+        [JsonPropertyName("backchannel_token_delivery_modes_supported")]
+        public IEnumerable<string> BackchannelTokenDeliveryModesSupported { get; set; }
     }
 }

@@ -13,7 +13,14 @@ public enum Error
     InvalidRequestUri,
     UnsupportedGrantType,
     InvalidGrant,
-    InvalidDPoPProof
+    InvalidDPoPProof,
+    UnknownUserId,
+    MissingUserCode,
+    InvalidUserCode,
+    InvalidBindingMessage,
+    AuthorizationPending,
+    ExpiredToken,
+    AccessDenied
 }
 
 public static class ErrorDescriptions

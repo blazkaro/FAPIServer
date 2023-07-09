@@ -62,12 +62,11 @@ public class AuthorizationResponseGenerator : IAuthorizationResponseGenerator
 
         List<AuthorizationDetail> authorizationDetails = new();
         IEnumerable<string> claims;
-        if (validatedRequest.ParObject.RequestedGrant is not null || validatedRequest.ParObject.FreshGrant is not null)
+        if (validatedRequest.ParObject.Grant is not null)
         {
-            var grant = (validatedRequest.ParObject.RequestedGrant ?? validatedRequest.ParObject.FreshGrant)!;
             // This is scenario where action was specified or fresh grant was created
-            authorizationDetails.AddRange(grant.AuthorizationDetails);
-            claims = grant.Claims;
+            authorizationDetails.AddRange(validatedRequest.ParObject.Grant.AuthorizationDetails);
+            claims = validatedRequest.ParObject.Grant.Claims;
         }
         else if (similarGrant is not null)
         {
@@ -109,7 +108,7 @@ public class AuthorizationResponseGenerator : IAuthorizationResponseGenerator
             RedirectUri = validatedRequest.ParObject.RedirectUri,
             CodeChallenge = validatedRequest.ParObject.CodeChallenge,
             AuthTime = context.GetValidUser().AuthTime,
-            Grant = validatedRequest.ParObject.RequestedGrant ?? validatedRequest.ParObject.FreshGrant ?? similarGrant,
+            Grant = validatedRequest.ParObject.Grant ?? similarGrant,
             DPoPPkh = validatedRequest.ParObject.DPoPPkh,
             ExpiresAt = DateTime.UtcNow.AddSeconds(validatedRequest.Client.AuthorizationCodeLifetime.Seconds)
         };

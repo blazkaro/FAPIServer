@@ -3,13 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace FAPIServer.Models;
 
-public class ClientAssertionPayload
+public class ClientAssertionPayload : TokenPayloadBase<ClientAssertionPayload>
 {
-    public static ClientAssertionPayload? FromJson(string json)
-    {
-        return JsonSerializer.Deserialize<ClientAssertionPayload>(json);
-    }
-
     [JsonPropertyName("iss")]
     public string Issuer { get; set; }
 

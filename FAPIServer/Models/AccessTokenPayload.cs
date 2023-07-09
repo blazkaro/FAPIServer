@@ -1,21 +1,10 @@
 ﻿using FAPIServer.Storage.ValueObjects;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FAPIServer.Models;
 
-public class AccessTokenPayload
+public class AccessTokenPayload : TokenPayloadBase<AccessTokenPayload>
 {
-    public AccessTokenPayload()
-    {
-
-    }
-
-    public static AccessTokenPayload? FromJson(string json)
-    {
-        return JsonSerializer.Deserialize<AccessTokenPayload>(json);
-    }
-
     [JsonPropertyName("iss")]
     public string Issuer { get; set; }
 

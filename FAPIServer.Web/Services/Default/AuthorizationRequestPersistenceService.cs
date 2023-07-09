@@ -2,6 +2,7 @@
 using FAPIServer.Helpers;
 using FAPIServer.RequestHandling.Requests;
 using FAPIServer.Services;
+using FAPIServer.Storage;
 using FAPIServer.Storage.Models;
 using FAPIServer.Storage.Stores;
 using Microsoft.AspNetCore.Http;
@@ -16,12 +17,15 @@ public class AuthorizationRequestPersistenceService : IAuthorizationRequestPersi
 {
     private readonly IParObjectStore _parObjectStore;
     private readonly IHttpContextAccessor _contextAccessor;
+    private readonly IChangesTracker<ParObject> _changesTracker;
 
     public AuthorizationRequestPersistenceService(IParObjectStore parObjectStore,
-        IHttpContextAccessor contextAccessor)
+        IHttpContextAccessor contextAccessor,
+        IChangesTracker<ParObject> changesTracker)
     {
         _parObjectStore = parObjectStore;
         _contextAccessor = contextAccessor;
+        _changesTracker = changesTracker;
     }
 
     private const string SESSION_COOKIE_NAME = "asid";
@@ -75,6 +79,8 @@ public class AuthorizationRequestPersistenceService : IAuthorizationRequestPersi
 
     public async Task UpdateAsync(ParObject parObject, Action<ParObject> update, CancellationToken cancellationToken = default)
     {
-        await _parObjectStore.UpdateAsync(parObject.Uri, update, cancellationToken);
+        _changesTracker.BeginTracking(parObject);
+        update(parObject);
+        await _changesTracker.SaveChangesAsync(cancellationToken);
     }
 }

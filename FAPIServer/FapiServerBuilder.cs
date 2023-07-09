@@ -46,10 +46,17 @@ public class FapiServerBuilder
         return this;
     }
 
-    public FapiServerBuilder AddUserClaimsService<TStore>()
-        where TStore : class, IUserClaimsService
+    public FapiServerBuilder AddUserService<TStore>()
+        where TStore : class, IUserService
     {
-        _services.TryAddScoped<IUserClaimsService, TStore>();
+        _services.TryAddScoped<IUserService, TStore>();
+        return this;
+    }
+
+    public FapiServerBuilder AddCibaUserNotificationService<TService>()
+        where TService : class, ICibaUserNotificationService
+    {
+        _services.TryAddScoped<ICibaUserNotificationService, TService>();
         return this;
     }
 }

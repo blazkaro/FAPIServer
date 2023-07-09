@@ -14,6 +14,9 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder.Property(p => p.Ed25519PublicKey)
             .HasConversion<Ed25519KeyConverter>();
 
+        builder.Property(p => p.BackchannelClientNotificationEndpoint)
+            .HasConversion<UriConverter>();
+
         builder.Property(p => p.RequestUriLifetime)
             .HasConversion<LifetimeConverter>();
 

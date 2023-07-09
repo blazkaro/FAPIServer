@@ -57,16 +57,19 @@ public class DiscoveryEndpoint : Endpoint
             TokenRevocationEndpoint = $"{issuer}fapi/token/revocation",
             TokenIntrospectionEndpoint = $"{issuer}fapi/token/introspection",
             GrantManagementEndpoint = $"{issuer}fapi/grants/",
+            BackchannelAuthenticationEndpoint = $"{issuer}fapi/ciba",
             RequirePushedAuthorizationRequests = true,
             GrantManagementActionRequired = _options.GrantManagementActionRequired,
             PaserksUri = $"{issuer}fapi/paserks",
             AuthorizationDetailsTypesSupported = await _authorizationDetailSchemaStore.FindDiscoverableAsync(cancellationToken),
             ClaimsSupported = await _claimsStore.FindDiscoverableAsync(cancellationToken),
-            GrantManagementActionsSupported = Constants.SupportedGrantManagementActions.Actions,
+            GrantManagementActionsSupported = Constants.GrantManagementActions.Actions,
             ResponseTypesSupported = new string[] { "code" },
-            GrantTypesSupported = Constants.SupportedGrantTypes.Types,
-            AuthMethodsSupported = new string[] { Constants.SupportedClientAuthenticationMethods.PrivateKeyPaseto },
-            CodeChallengeMethodsSupported = new string[] { Constants.SupportedCodeChallengeMethods.S256 }
+            GrantTypesSupported = Constants.GrantTypes.Types,
+            AuthMethodsSupported = new string[] { Constants.ClientAuthenticationMethods.PrivateKeyPaseto },
+            CodeChallengeMethodsSupported = new string[] { Constants.CodeChallengeMethods.S256 },
+            BackchannelTokenDeliveryModesSupported = new string[] { Constants.CibaModes.Ping, Constants.CibaModes.Poll },
+            BackchannelUserCodeParameterSupported = true
         };
     }
 }

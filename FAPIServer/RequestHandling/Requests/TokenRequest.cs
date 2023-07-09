@@ -10,5 +10,6 @@ public class TokenRequest : IRequest
     public virtual string? AuthorizationDetailsTypes { get; set; }
     public virtual string? Claims { get; set; }
     public virtual string? RefreshToken { get; set; }
+    public virtual string? AuthReqId { get; set; }
     public virtual string? DPoP { get; set; }
 }

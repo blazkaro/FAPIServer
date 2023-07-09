@@ -13,9 +13,9 @@ public class ClaimsStore : IClaimsStore
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<UserClaim>> FindByTypesAsync(IEnumerable<string> types, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UserClaim>> FindEnabledByTypesAsync(IEnumerable<string> types, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.UserClaims.AsNoTrackingWithIdentityResolution()
+        return await _dbContext.UserClaims.AsNoTracking()
             .Where(p => p.Enabled && types.Contains(p.Type))
             .Select(p => new UserClaim
             {

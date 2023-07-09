@@ -20,7 +20,7 @@ public class RevokedClientAssertionStore : IRevokedClientAssertionStore
 
     public async Task StoreAsync(RevokedClientAssertion revokedClientAssertion, CancellationToken cancellationToken = default)
     {
-        await _dbContext.RevokedClientAssertions.AddAsync(revokedClientAssertion, cancellationToken);
+        _dbContext.RevokedClientAssertions.Add(revokedClientAssertion);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

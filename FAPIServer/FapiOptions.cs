@@ -9,6 +9,7 @@ public class FapiOptions
     public bool AlwaysRequireInteractionWhenMergingGrant { get; set; } = false;
     public InputRestrictions InputRestrictions { get; set; } = new();
     public bool GrantManagementActionRequired { get; set; } = false;
+    public Lifetime CibaInterval { get; set; } = new Lifetime(5);
 }
 
 public class InputRestrictions
@@ -20,5 +21,5 @@ public class InputRestrictions
     public byte MinCodeChallengeLength { get; set; } = 43;
     public byte MaxCodeChallengeLength { get; set; } = 128;
     public short MaxCibaClientNotificationTokenLength { get; set; } = 1024;
-    public byte MaxCibaBindingMessageLength { get; set; } = 16;
+    public byte MaxCibaBindingMessageLength { get; set; } = 8;
 }

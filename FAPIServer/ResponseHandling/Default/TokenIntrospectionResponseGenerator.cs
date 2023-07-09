@@ -50,7 +50,7 @@ public class TokenIntrospectionResponseGenerator : ITokenIntrospectionResponseGe
         {
             Active = true,
             ClientId = atPayload.ClientId,
-            TokenType = Constants.SupportedAccessTokenTypes.DPoP,
+            TokenType = Constants.AccessTokenTypes.DPoP,
             NotBefore = atPayload.NotBefore,
             Expiration = atPayload.Expiration,
             Sub = atPayload.Subject,

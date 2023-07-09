@@ -5,6 +5,7 @@ namespace FAPIServer.Services;
 
 public interface IRefreshTokenService
 {
-    Task<string> GenerateAsync(AuthorizationCode authorizationCode, Lifetime lifetime, CancellationToken cancellationToken = default);
-    Task<string> RotateAsync(RefreshToken refreshToken, Client client, CancellationToken cancellationToken = default);
+    Task<RefreshToken> GenerateAsync(AuthorizationCode authorizationCode, Lifetime lifetime, CancellationToken cancellationToken = default);
+    Task<RefreshToken> GenerateAsync(CibaObject cibaObject, Lifetime lifetime, CancellationToken cancellationToken = default);
+    Task<RefreshToken> RotateAsync(RefreshToken refreshToken, Client client, CancellationToken cancellationToken = default);
 }

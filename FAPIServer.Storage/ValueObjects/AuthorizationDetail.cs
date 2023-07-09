@@ -8,6 +8,8 @@ namespace FAPIServer.Storage.ValueObjects;
 
 public partial record AuthorizationDetail
 {
+    private AuthorizationDetail() { }
+
     public AuthorizationDetail(string json)
     {
         if (!CanCreate(json, out AuthorizationDetail? authorizationDetail) || authorizationDetail is null)

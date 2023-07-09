@@ -20,7 +20,7 @@ public class RevokedAccessTokenStore : IRevokedAccessTokenStore
 
     public async Task StoreAsync(RevokedAccessToken revokedAccessToken, CancellationToken cancellationToken = default)
     {
-        await _dbContext.RevokedAccessTokens.AddAsync(revokedAccessToken, cancellationToken);
+        _dbContext.RevokedAccessTokens.Add(revokedAccessToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

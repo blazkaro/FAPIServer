@@ -14,11 +14,13 @@ public class GrantsDbContext : DbContext
     public DbSet<ParObject> ParObjects => Set<ParObject>();
     public DbSet<AuthorizationCode> AuthorizationCodes => Set<AuthorizationCode>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<CibaObject> CibaObjects => Set<CibaObject>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new GrantConfiguration())
             .ApplyConfiguration(new ParObjectConfiguration())
+            .ApplyConfiguration(new CibaObjectConfiguration())
             .ApplyConfiguration(new AuthorizationCodeConfiguration())
             .ApplyConfiguration(new RefreshTokenConfiguration());
     }

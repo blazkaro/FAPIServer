@@ -33,6 +33,16 @@ public class Client
     public bool AuthorizationCodeBindingToDpopKeyRequired { get; set; } = false;
 
     /// <summary>
+    /// The CIBA mode used to get the authentication result
+    /// </summary>
+    public string? CibaMode { get; set; }
+
+    /// <summary>
+    /// The endpoint where the client will be notified about authentication result
+    /// </summary>
+    public Uri? BackchannelClientNotificationEndpoint { get; set; }
+
+    /// <summary>
     /// Set lifetime for request URI. Defaults to 60s / 1min
     /// </summary>
     public Lifetime RequestUriLifetime { get; set; } = new Lifetime(60);

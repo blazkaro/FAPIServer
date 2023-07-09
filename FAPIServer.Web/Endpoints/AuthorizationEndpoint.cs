@@ -21,7 +21,7 @@ public class AuthorizationEndpoint : Endpoint<AuthorizationHttpRequest>
     [HttpGet]
     public override async Task<IActionResult> HandleAsync(AuthorizationHttpRequest request, CancellationToken cancellationToken)
     {
-        var context = new AuthorizationContext(request, Request.GetRequestedEndpointUri().ToString(), User);
+        var context = new AuthorizationContext(request, Request.GetSchemeAndHost().ToString(), User);
         var result = await _handler.HandleAsync(context, cancellationToken);
         if (!result.Success)
             return new ErrorActionResult(result.Error!.Value, result.FailureMessage);

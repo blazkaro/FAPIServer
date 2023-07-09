@@ -1,15 +1,9 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace FAPIServer.Models;
 
-public class DPoPPayload
+public class DPoPPayload : TokenPayloadBase<DPoPPayload>
 {
-    public static DPoPPayload? FromJson(string json)
-    {
-        return JsonSerializer.Deserialize<DPoPPayload>(json);
-    }
-
     [JsonPropertyName("nbf")]
     public DateTime NotBefore { get; set; }
 

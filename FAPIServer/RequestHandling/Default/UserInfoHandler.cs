@@ -6,11 +6,11 @@ namespace FAPIServer.RequestHandling.Default;
 
 public class UserInfoHandler : IUserInfoHandler
 {
-    private readonly IUserClaimsService _userClaimsService;
+    private readonly IUserService _userService;
 
-    public UserInfoHandler(IUserClaimsService userClaimsService)
+    public UserInfoHandler(IUserService userService)
     {
-        _userClaimsService = userClaimsService;
+        _userService = userService;
     }
 
     public async Task<IDictionary<string, object>> HandleAsync(AccessTokenPayload atPayload, CancellationToken cancellationToken = default)
@@ -23,7 +23,7 @@ public class UserInfoHandler : IUserInfoHandler
 
         var requestedClaims = atPayload.Claims?.FromSpaceDelimitedString();
         var claims = requestedClaims is not null
-            ? await _userClaimsService.GetClaims(atPayload.Subject, requestedClaims, cancellationToken)
+            ? await _userService.GetClaimsAsync(atPayload.Subject, requestedClaims, cancellationToken)
             : new Dictionary<string, object>();
 
         return claims;

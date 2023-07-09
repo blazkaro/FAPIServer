@@ -15,7 +15,7 @@ public class RefreshTokenStore : IRefreshTokenStore
 
     public async Task<RefreshToken?> FindByTokenAsync(string token, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.RefreshTokens.AsNoTrackingWithIdentityResolution()
+        return await _dbContext.RefreshTokens.AsNoTracking()
             .Where(p => p.Token == token)
             .Include(p => p.Grant)
             .SingleOrDefaultAsync(cancellationToken);
@@ -31,7 +31,6 @@ public class RefreshTokenStore : IRefreshTokenStore
     public async Task RemoveAsync(string token, CancellationToken cancellationToken = default)
     {
         _dbContext.RefreshTokens.Remove(new RefreshToken { Token = token });
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task StoreAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
@@ -41,18 +40,7 @@ public class RefreshTokenStore : IRefreshTokenStore
             _dbContext.Grants.Attach(refreshToken.Grant);
         }
 
-        await _dbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+        _dbContext.RefreshTokens.Add(refreshToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task UpdateAsync(string token, Action<RefreshToken> update, CancellationToken cancellationToken = default)
-    {
-        var entity = await _dbContext.RefreshTokens.FindAsync(new string[] { token }, cancellationToken);
-
-        if (entity != null)
-        {
-            update(entity);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
     }
 }

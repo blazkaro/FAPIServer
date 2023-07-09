@@ -30,7 +30,7 @@ public class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestVa
         if (context is null)
             throw new ArgumentNullException(nameof(context));
 
-        if (!context.Client.AllowedGrantTypes.Contains(Constants.SupportedGrantTypes.AuthorizationCode))
+        if (!context.Client.AllowedGrantTypes.Contains(Constants.GrantTypes.AuthorizationCode))
             return new(Error.UnauthorizedClient, ErrorDescriptions.UnauthorizedClient);
 
         // Whether required parameters are present
@@ -46,7 +46,7 @@ public class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestVa
                 return new(Error.InvalidRequest, ErrorDescriptions.LengthRestrictionsUnsatisfied(InvalidParamName));
         }
 
-        if (context.Request.CodeChallengeMethod != Constants.SupportedCodeChallengeMethods.S256)
+        if (context.Request.CodeChallengeMethod != Constants.CodeChallengeMethods.S256)
             return new(Error.InvalidRequest, ErrorDescriptions.NotSupportedValue(context.Request.CodeChallengeMethod, "code_challenge_method"));
 
         // Whether code_challenge is Base64-Url encoded
@@ -63,14 +63,14 @@ public class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestVa
             return new(Error.InvalidRequest, "The 'dpop_pkh' must be Base64-Url encoded string of SHA-256 hash");
 
         // Whether requested prompt value is supported
-        if (!string.IsNullOrEmpty(context.Request.Prompt) && !Constants.SupportedPromptTypes.Types.Contains(context.Request.Prompt))
+        if (!string.IsNullOrEmpty(context.Request.Prompt) && !Constants.PromptTypes.Types.Contains(context.Request.Prompt))
             return new(Error.InvalidRequest, ErrorDescriptions.NotSupportedValue(context.Request.Prompt, "prompt"));
 
         // Whether max_age is greater than 0
         if (context.Request.MaxAge.HasValue && context.Request.MaxAge.Value < 0)
             return new(Error.InvalidRequest, "The 'max_age' must be non-negative integer");
 
-        Grant? requestedGrant = null;
+        Grant? requestedGrant;
         // Whether grant_id and grant_management_action are valid
         {
             var result = await _grantManagementValidator.ValidateAsync(
@@ -83,6 +83,7 @@ public class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestVa
             requestedGrant = result.Grant;
         }
 
+        // Validate redirect_uri
         if (!context.Client.RedirectUris.Select(p => p.ToString()).Contains(context.Request.RedirectUri))
             return new(Error.InvalidRedirectUri, "The requested 'redirect_uri' is not valid for this client");
 
@@ -91,14 +92,11 @@ public class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestVa
             context.Request.GrantManagementAction,
             context.Request.AuthorizationDetails,
             context.Request.Claims,
+            Constants.GrantTypes.AuthorizationCode,
             requestedGrant), cancellationToken);
 
         if (!resourcesValidationResult.IsValid)
             return new(resourcesValidationResult.Error, resourcesValidationResult.FailureMessage);
-
-        if (context.Request.GrantManagementAction != Constants.SupportedGrantManagementActions.Merge
-            && !resourcesValidationResult.Claims.Contains(Constants.BuiltInClaims.Subject))
-            return new(Error.InvalidClaims, $"The '{Constants.BuiltInClaims.Subject}' must be requested");
 
         return new(new ValidatedPushedAuthorizationRequest(context.Request,
             context.Client,
@@ -110,7 +108,7 @@ public class PushedAuthorizationRequestValidator : IPushedAuthorizationRequestVa
 
     private (bool IsValid, string InvalidParamName) ValidateAgainstRequiredParameters(PushedAuthorizationRequest request)
     {
-        if (request.Claims.IsNullOrEmpty() && request.GrantManagementAction != Constants.SupportedGrantManagementActions.Merge)
+        if (request.Claims.IsNullOrEmpty() && request.GrantManagementAction != Constants.GrantManagementActions.Merge)
             return new(false, "claims");
 
         if (request.RedirectUri.IsNullOrEmpty())

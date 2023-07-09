@@ -19,5 +19,9 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 
         builder.Property(p => p.Claims)
             .HasConversion<StringEnumerableConverter>();
+
+        builder.HasOne(p => p.Grant)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

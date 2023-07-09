@@ -39,9 +39,9 @@ public class ClientAuthenticator : IClientAuthenticator
 
     private async Task<ClientAuthenticationResult> PrivateKeyPasetoAuthMethod(ClientAuthenticationContext context, Client client, CancellationToken cancellationToken)
     {
-        if (context.AuthRequest.ClientAssertionType != Constants.SupportedClientAssertionTypes.PasetoBearer
+        if (context.AuthRequest.ClientAssertionType != Constants.ClientAssertionTypes.PasetoBearer
             || string.IsNullOrEmpty(context.AuthRequest.ClientAssertion))
-            return Failed(Error.InvalidClient, $"The '{Constants.SupportedClientAuthenticationMethods.PrivateKeyPaseto}' authentication method is required");
+            return Failed(Error.InvalidClient, $"The '{Constants.ClientAuthenticationMethods.PrivateKeyPaseto}' authentication method is required");
 
         var assertionValidationResult = new PasetoBuilder()
             .WithJsonSerializer(new PasetoPayloadSerializer())
